@@ -1,0 +1,65 @@
+services:
+  webserver:
+    build: .
+    container_name: poiquest-nestjs
+    restart: unless-stopped
+    depends_on:
+      - database
+    environment:
+      - TZ=Europe/Madrid
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+      - NODE_ENV=${NODE_ENV}
+    ports:
+      - ${WEB_SERVER_PORT}:3000
+    working_dir: /web
+    command: pm2-runtime start pm2.json
+    volumes:
+      - .:/web
+    networks:
+      - poiquest-network
+
+  database:
+    image: yobasystems/alpine-mariadb:11.4.5
+    container_name: poiquest-mariadb
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - TZ=Europe/Madrid
+    volumes:
+    - mariadb_data:/var/lib/mysql
+    ports:
+      - "${DB_PORT}:3306"
+    networks:
+      - poiquest-network
+
+  phpmyadmin:
+    image: phpmyadmin:apache
+    container_name: poiquest-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - database
+    environment:
+      PMA_HOST: database                          # nombre del servicio de tu MySQL
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      UPLOAD_LIMIT: 256M
+      BLOWFISH_SECRET: "yosoytupadre"    # opcional, clave de cifrado para asegurar las cookies de autenticación
+    ports:
+      - "8081:80"                             
+    networks:
+      - poiquest-network
+
+volumes:
+  mariadb_data:
+    driver: local
+
+networks:
+  poiquest-network:
+    driver: bridge
