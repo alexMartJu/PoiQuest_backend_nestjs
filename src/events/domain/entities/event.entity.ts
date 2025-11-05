@@ -1,29 +1,23 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn,
-  UpdateDateColumn, DeleteDateColumn, Unique, Index
+  UpdateDateColumn, DeleteDateColumn, Index, BeforeInsert
 } from 'typeorm';
-import { PointOfInterestEntity } from './point-of-interest.entity';
-import { TimeSlotEntity } from './time-slot.entity';
-import { TicketEntity } from './ticket.entity';
-import { RouteEntity } from './route.entity';
-
-export enum EventType {
-  MUSEUM = 'museum',
-  CONCERT = 'concert',
-  THEATER = 'theater',
-  TOUR = 'tour',
-  OTHER = 'other',
-}
+import { randomUUID } from 'crypto';
+import { PointOfInterestEntity } from '../../../entities/point-of-interest.entity';
+import { TimeSlotEntity } from '../../../entities/time-slot.entity';
+import { TicketEntity } from '../../../entities/ticket.entity';
+import { RouteEntity } from '../../../entities/route.entity';
+import { EventType } from '../enums/event-type.enum';
 
 @Entity({ name: 'event' })
-@Unique('uq_event_slug', ['slug'])
+@Index('uq_event_uuid', ['uuid'], { unique: true })
 @Index('idx_event_name', ['name'])
 export class EventEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
-  slug!: string;
+  @Column({ type: 'char', length: 36, unique: true })
+  uuid!: string;
 
   @Column({ type: 'varchar', length: 255 })
   name!: string;
@@ -64,4 +58,12 @@ export class EventEntity {
 
   @OneToMany(() => RouteEntity, (r) => r.event)
   routes!: RouteEntity[];
+
+  // Genera el uuid automáticamente antes de insertar
+  @BeforeInsert()
+  generateUuid() {
+    if (!this.uuid) {
+      this.uuid = randomUUID();
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index, OneToMany
 } from 'typeorm';
-import { EventEntity } from './event.entity';
+import { EventEntity } from '../events/domain/entities/event.entity';
 import { TicketEntity } from './ticket.entity';
 
 @Entity({ name: 'time_slot' })

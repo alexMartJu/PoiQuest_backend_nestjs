@@ -1,7 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index
 } from 'typeorm';
-import { EventEntity } from './event.entity';
+import { EventEntity } from '../events/domain/entities/event.entity';
 
 @Entity({ name: 'route' })
 @Index('idx_route_event', ['eventId'])

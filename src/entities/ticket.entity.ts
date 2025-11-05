@@ -4,7 +4,7 @@ import {
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { ProfileEntity } from './profile.entity';
-import { EventEntity } from './event.entity';
+import { EventEntity } from '../events/domain/entities/event.entity';
 import { TimeSlotEntity } from './time-slot.entity';
 import { PaymentEntity } from './payment.entity';
 

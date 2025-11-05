@@ -3,7 +3,7 @@ import {
   UpdateDateColumn, DeleteDateColumn, BeforeInsert, OneToMany, Index
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { EventEntity } from './event.entity';
+import { EventEntity } from '../events/domain/entities/event.entity';
 import { ScanEntity } from './scan.entity';
 
 @Entity({ name: 'point_of_interest' })
