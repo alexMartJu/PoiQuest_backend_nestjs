@@ -9,7 +9,7 @@ import { RoleEntity } from './entities/role.entity';
 import { PermissionEntity } from './entities/permission.entity';
 import { ProfileEntity } from './entities/profile.entity';
 import { BlacklistTokenEntity } from './entities/blacklist-token.entity';
-import { EventEntity } from './entities/event.entity';
+import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './entities/point-of-interest.entity';
 import { TimeSlotEntity } from './entities/time-slot.entity';
 import { TicketEntity } from './entities/ticket.entity';
@@ -25,6 +25,7 @@ import { IncidentEntity } from './entities/incident.entity';
 // Seeders
 import { RoleSeeder } from './db/seeding/seeds/roles.seeder';
 import { UserSeeder } from './db/seeding/seeds/users.seeder';
+import { EventSeeder } from './db/seeding/seeds/events.seeder';
 
 config();
 
@@ -54,7 +55,7 @@ const options: DataSourceOptions & SeederOptions = {
     NotificationEntity,
     IncidentEntity,
   ],
-  seeds: [RoleSeeder, UserSeeder],
+  seeds: [RoleSeeder, UserSeeder, EventSeeder],
 };
 
 const dataSource = new DataSource(options);
