@@ -9,7 +9,7 @@ import { ProfileEntity } from './entities/profile.entity';
 import { RoleEntity } from './entities/role.entity';
 import { PermissionEntity } from './entities/permission.entity';
 import { BlacklistTokenEntity } from './entities/blacklist-token.entity';
-import { EventEntity } from './entities/event.entity';
+import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './entities/point-of-interest.entity';
 import { TimeSlotEntity } from './entities/time-slot.entity';
 import { TicketEntity } from './entities/ticket.entity';
@@ -24,6 +24,7 @@ import { IncidentEntity } from './entities/incident.entity';
 
 //Modules
 import { UsersModule } from './users/users.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { UsersModule } from './users/users.module';
       }),
     }),
     UsersModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
