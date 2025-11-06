@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, QueryFailedError } from 'typeorm';
 import { EventsRepository } from '../../../domain/repositories/events.repository';
 import { EventEntity } from '../../../domain/entities/event.entity';
+import { EventStatus } from '../../../domain/enums/event-status.enum';
 import { ConflictError } from '../../../../shared/errors/conflict.error';
 
 @Injectable()
@@ -13,10 +14,13 @@ export class TypeormEventsRepository implements EventsRepository {
   ) {}
 
   async findAll(): Promise<EventEntity[]> {
-    // Ordenamos por createdAt asc para que los eventos creados primero aparezcan primero.
+    // Solo eventos ACTIVOS y no eliminados
     return await this.eventRepo.find({
       order: { createdAt: 'ASC' },
-      where: { deletedAt: IsNull() }, // Solo eventos no eliminados
+      where: { 
+        status: EventStatus.ACTIVE,
+        deletedAt: IsNull() 
+      },
     });
   }
 
@@ -28,7 +32,32 @@ export class TypeormEventsRepository implements EventsRepository {
 
   async findOneByUuid(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
-      where: { uuid, deletedAt: IsNull() }
+      where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() }
+    });
+  }
+
+  async findOneByUuidIncludingDeleted(uuid: string): Promise<EventEntity | null> {
+    // Busca el evento por uuid sin filtrar por status ni deletedAt.
+    // withDeleted: true permite recuperar registros soft-deleted.
+    return await this.eventRepo.findOne({
+      where: { uuid },
+      withDeleted: true,
+    });
+  }
+
+  async findAllFinished(): Promise<EventEntity[]> {
+    return await this.eventRepo.find({
+      order: { createdAt: 'ASC' },
+      where: {
+        status: EventStatus.FINISHED,
+        deletedAt: IsNull(),
+      },
+    });
+  }
+
+  async findFinishedByUuid(uuid: string): Promise<EventEntity | null> {
+    return await this.eventRepo.findOne({
+      where: { uuid, status: EventStatus.FINISHED, deletedAt: IsNull() },
     });
   }
 

@@ -8,6 +8,7 @@ import { TimeSlotEntity } from '../../../entities/time-slot.entity';
 import { TicketEntity } from '../../../entities/ticket.entity';
 import { RouteEntity } from '../../../entities/route.entity';
 import { EventType } from '../enums/event-type.enum';
+import { EventStatus } from '../enums/event-status.enum';
 
 @Entity({ name: 'event' })
 @Index('uq_event_uuid', ['uuid'], { unique: true })
@@ -27,6 +28,9 @@ export class EventEntity {
 
   @Column({ type: 'enum', enum: EventType })
   type!: EventType;
+
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.ACTIVE })
+  status!: EventStatus;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   location?: string | null;

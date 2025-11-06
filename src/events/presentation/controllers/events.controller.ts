@@ -18,21 +18,39 @@ import { ErrorResponse } from '../../../shared/dto/error.response.dto';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  @ApiOperation({ summary: 'Lista de todos los eventos' })
-  @ApiOkResponse({ type: EventResponse, isArray: true, description: 'Lista de eventos' })
+  @ApiOperation({ summary: 'Lista de todos los eventos activos' })
+  @ApiOkResponse({ type: EventResponse, isArray: true, description: 'Lista de eventos activos' })
   @Get()
   async getEvents(): Promise<EventResponse[]> {
     const entities = await this.eventsService.findAll();
     return EventMapper.toResponseList(entities);
   }
 
-  @ApiOperation({ summary: 'Detalle de un evento por uuid' })
-  @ApiParam({ name: 'uuid', description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
-  @ApiOkResponse({ type: EventResponse, description: 'Detalle del evento' })
-  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
+  @ApiOperation({ summary: 'Lista de eventos finalizados' })
+  @ApiOkResponse({ type: EventResponse, isArray: true, description: 'Lista de eventos finalizados' })
+  @Get('finished')
+  async getFinishedEvents(): Promise<EventResponse[]> {
+    const entities = await this.eventsService.findAllFinished();
+    return EventMapper.toResponseList(entities);
+  }
+
+  @ApiOperation({ summary: 'Detalle de un evento activo por uuid' })
+  @ApiParam({ name: 'uuid', description: 'UUID único del evento activo', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiOkResponse({ type: EventResponse, description: 'Detalle del evento activo' })
+  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado o no activo' })
   @Get(':uuid')
   async getEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
     const entity = await this.eventsService.findOneByUuid(uuid);
+    return EventMapper.toResponse(entity);
+  }
+
+  @ApiOperation({ summary: 'Detalle de un evento finalizado por uuid' })
+  @ApiParam({ name: 'uuid', description: 'UUID único del evento finalizado', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiOkResponse({ type: EventResponse, description: 'Detalle del evento finalizado' })
+  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento finalizado no encontrado' })
+  @Get('finished/:uuid')
+  async getFinishedEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
+    const entity = await this.eventsService.findFinishedByUuid(uuid);
     return EventMapper.toResponse(entity);
   }
 
@@ -66,6 +84,10 @@ export class EventsController {
   @ApiParam({ name: 'uuid', description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
   @ApiOkResponse({ description: 'Evento eliminado exitosamente' })
   @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
+  @ApiBadRequestResponse({
+    type: ErrorResponse,
+    description: 'El evento existe pero su estado no permite eliminación (status != ACTIVE).',
+  })
   @HttpCode(HttpStatus.OK)
   @Delete(':uuid')
   async deleteEvent(@Param('uuid') uuid: string): Promise<{ message: string }> {

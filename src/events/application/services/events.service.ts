@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EventsRepository } from '../../domain/repositories/events.repository';
 import { EventEntity } from '../../domain/entities/event.entity';
 import { EventType } from '../../domain/enums/event-type.enum';
+import { EventStatus } from '../../domain/enums/event-status.enum';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
@@ -13,7 +14,7 @@ export class EventsService {
     private readonly eventsRepo: EventsRepository,
   ) {}
 
-  /// Obtiene todos los eventos (no eliminados)
+  /// Obtiene todos los eventos activos (no eliminados)
   async findAll(): Promise<EventEntity[]> {
     return await this.eventsRepo.findAll();
   }
@@ -21,6 +22,20 @@ export class EventsService {
   /// Obtiene un evento por su uuid
   async findOneByUuid(uuid: string): Promise<EventEntity> {
     return this.findEventByUuidOrFail(uuid);
+  }
+
+  /// Obtiene todos los eventos finalizados (no eliminados)
+  async findAllFinished(): Promise<EventEntity[]> {
+    return await this.eventsRepo.findAllFinished();
+  }
+
+  /// Obtiene un evento finalizado por su uuid
+  async findFinishedByUuid(uuid: string): Promise<EventEntity> {
+    const event = await this.eventsRepo.findFinishedByUuid(uuid);
+    if (!event) {
+      throw new NotFoundError('Evento finalizado no encontrado', { uuid });
+    }
+    return event;
   }
 
   /// Crea un nuevo evento
@@ -33,6 +48,7 @@ export class EventsService {
       name: dto.name,
       description: dto.description ?? null,
       type: dto.type,
+      status: EventStatus.ACTIVE, // Por defecto se crea como ACTIVE
       location: dto.location ?? null,
       startDate: dto.startDate,
       endDate: dto.endDate ?? null,
@@ -43,8 +59,19 @@ export class EventsService {
 
   /// Actualiza un evento existente por uuid
   async updateByUuid(uuid: string, dto: UpdateEventDto): Promise<EventEntity> {
-    // Verifica que el evento exista
-    const event = await this.findEventByUuidOrFail(uuid);
+    // Buscar sin filtros para distinguir "no existe" de "existe pero no está ACTIVE"
+    const event = await this.eventsRepo.findOneByUuidIncludingDeleted(uuid);
+    if (!event) {
+      throw new NotFoundError('Evento no encontrado', { uuid });
+    }
+    // Si está soft-deleted, lo tratamos como no encontrado (404)
+    if (event.deletedAt) {
+      throw new NotFoundError('Evento no encontrado', { uuid });
+    }
+    // Si existe pero no está ACTIVE, devolver ValidationError (400)
+    if (event.status !== EventStatus.ACTIVE) {
+      throw new ValidationError('Solo se pueden actualizar eventos con estado ACTIVE', { uuid, status: event.status });
+    }
 
     // Asigna campos permitidos
     if (dto.name !== undefined) event.name = dto.name;
@@ -64,8 +91,19 @@ export class EventsService {
 
   /// Elimina un evento (soft delete) por uuid
   async removeByUuid(uuid: string): Promise<void> {
-    // Verifica que el evento exista
-    await this.findEventByUuidOrFail(uuid);
+    // Buscar sin filtros para distinguir 404 de ValidationError
+    const event = await this.eventsRepo.findOneByUuidIncludingDeleted(uuid);
+    if (!event) {
+      throw new NotFoundError('Evento no encontrado', { uuid });
+    }
+    // Si está soft-deleted, lo tratamos como no encontrado (404)
+    if (event.deletedAt) {
+      throw new NotFoundError('Evento no encontrado', { uuid });
+    }
+    // Solo se permite eliminar si el evento está ACTIVE
+    if (event.status !== EventStatus.ACTIVE) {
+      throw new ValidationError('Solo se pueden eliminar eventos con estado ACTIVE', { uuid, status: event.status });
+    }
 
     try {
       await this.eventsRepo.softDeleteByUuid(uuid);

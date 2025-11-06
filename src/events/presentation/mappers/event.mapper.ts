@@ -8,6 +8,7 @@ export class EventMapper {
       name: event.name,
       description: event.description ?? null,
       type: event.type,
+      status: event.status,
       location: event.location ?? null,
       startDate: event.startDate,
       endDate: event.endDate ?? null,
