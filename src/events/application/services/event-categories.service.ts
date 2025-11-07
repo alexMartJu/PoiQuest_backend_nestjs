@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventCategoriesRepository } from '../../domain/repositories/event-categories.repository';
-// import { EventsRepository } from '../../domain/repositories/events.repository';
+import { EventsRepository } from '../../domain/repositories/events.repository';
 import { EventCategoryEntity } from '../../domain/entities/event-category.entity';
 import { CreateEventCategoryDto } from '../dto/create-event-category.dto';
 import { UpdateEventCategoryDto } from '../dto/update-event-category.dto';
@@ -11,7 +11,7 @@ import { ValidationError } from '../../../shared/errors/validation.error';
 export class EventCategoriesService {
   constructor(
     private readonly categoriesRepo: EventCategoriesRepository,
-    // private readonly eventsRepo: EventsRepository,
+    private readonly eventsRepo: EventsRepository,
   ) {}
 
   /// Obtiene todas las categorías (no eliminadas)
@@ -65,10 +65,10 @@ export class EventCategoriesService {
     }
 
     // Verificar si existen eventos asociados a esta categoría (no eliminados)
-    // const hasEvents = await this.eventsRepo.existsByCategoryId(category.id);
-    // if (hasEvents) {
-    //   throw new ValidationError('No se puede eliminar la categoría porque existen eventos asociados');
-    // }
+    const hasEvents = await this.eventsRepo.existsByCategoryId(category.id);
+    if (hasEvents) {
+      throw new ValidationError('No se puede eliminar la categoría porque existen eventos asociados');
+    }
 
     await this.categoriesRepo.softDeleteByUuid(uuid);
   }
