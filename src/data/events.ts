@@ -1,11 +1,10 @@
-import { EventType } from '../events/domain/enums/event-type.enum';
 import { EventStatus } from '../events/domain/enums/event-status.enum';
 
 export default [
   {
     name: 'Museo del Prado',
     description: 'Visita guiada al Museo Nacional del Prado, uno de los museos de arte más importantes del mundo.',
-    type: EventType.MUSEUM,
+    categoryName: 'Museo',
     status: EventStatus.ACTIVE,
     location: 'Madrid, España',
     startDate: '2025-01-15',
@@ -14,7 +13,7 @@ export default [
   {
     name: 'Concierto Sinfónico de Verano',
     description: 'Gran concierto sinfónico al aire libre con la Orquesta Nacional.',
-    type: EventType.CONCERT,
+    categoryName: 'Concierto',
     status: EventStatus.ACTIVE,
     location: 'Parque del Retiro, Madrid',
     startDate: '2025-07-20',
@@ -23,7 +22,7 @@ export default [
   {
     name: 'Romeo y Julieta',
     description: 'Representación teatral clásica de la obra de William Shakespeare.',
-    type: EventType.THEATER,
+    categoryName: 'Teatro',
     status: EventStatus.ACTIVE,
     location: 'Teatro Real, Madrid',
     startDate: '2025-03-10',
@@ -32,7 +31,7 @@ export default [
   {
     name: 'Tour por el Madrid de los Austrias',
     description: 'Recorrido guiado por el casco histórico de Madrid, visitando los principales monumentos del Madrid de los Austrias.',
-    type: EventType.TOUR,
+    categoryName: 'Tour',
     status: EventStatus.ACTIVE,
     location: 'Centro histórico de Madrid',
     startDate: '2025-02-01',
@@ -41,7 +40,7 @@ export default [
   {
     name: 'Feria de Ciencias y Tecnología',
     description: 'Exposición interactiva de innovaciones científicas y tecnológicas para todas las edades.',
-    type: EventType.OTHER,
+    categoryName: 'Otros',
     status: EventStatus.ACTIVE,
     location: 'IFEMA, Madrid',
     startDate: '2025-05-10',
@@ -50,7 +49,7 @@ export default [
   {
     name: 'Feria del Automovilismo',
     description: 'Exposición interactiva de innovaciones en el mundo del automovilismo.',
-    type: EventType.OTHER,
+    categoryName: 'Otros',
     status: EventStatus.FINISHED,
     location: 'IFEMA, Madrid',
     startDate: '2025-05-10',
