@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, QueryFailedError } from 'typeorm';
+import { Repository, IsNull, QueryFailedError, Not } from 'typeorm';
 import { EventsRepository } from '../../../domain/repositories/events.repository';
 import { EventEntity } from '../../../domain/entities/event.entity';
 import { EventStatus } from '../../../domain/enums/event-status.enum';
@@ -21,18 +21,21 @@ export class TypeormEventsRepository implements EventsRepository {
         status: EventStatus.ACTIVE,
         deletedAt: IsNull() 
       },
+      relations: ['category'],
     });
   }
 
   async findOneById(id: number): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
-      where: { id, deletedAt: IsNull() }
+      where: { id, deletedAt: IsNull() },
+      relations: ['category'],
     });
   }
 
   async findOneByUuid(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
-      where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() }
+      where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
+      relations: ['category'],
     });
   }
 
@@ -42,23 +45,28 @@ export class TypeormEventsRepository implements EventsRepository {
     return await this.eventRepo.findOne({
       where: { uuid },
       withDeleted: true,
+      relations: ['category'],
     });
   }
 
   async findAllFinished(): Promise<EventEntity[]> {
-    return await this.eventRepo.find({
-      order: { createdAt: 'ASC' },
-      where: {
-        status: EventStatus.FINISHED,
-        deletedAt: IsNull(),
-      },
-    });
+    // Usar QueryBuilder para asegurar que la relación `category` se cargue
+    // incluso si la categoría está soft-deleted.
+    return await this.eventRepo.createQueryBuilder('event')
+      .leftJoinAndSelect('event.category', 'category')
+      .where('event.status = :status', { status: EventStatus.FINISHED })
+      .andWhere('event.deletedAt IS NULL')
+      .orderBy('event.createdAt', 'ASC')
+      .getMany();
   }
 
   async findFinishedByUuid(uuid: string): Promise<EventEntity | null> {
-    return await this.eventRepo.findOne({
-      where: { uuid, status: EventStatus.FINISHED, deletedAt: IsNull() },
-    });
+    return await this.eventRepo.createQueryBuilder('event')
+      .leftJoinAndSelect('event.category', 'category')
+      .where('event.uuid = :uuid', { uuid })
+      .andWhere('event.status = :status', { status: EventStatus.FINISHED })
+      .andWhere('event.deletedAt IS NULL')
+      .getOne();
   }
 
   create(data: Partial<EventEntity>): EventEntity {
@@ -91,5 +99,14 @@ export class TypeormEventsRepository implements EventsRepository {
     if (event) {
       await this.eventRepo.softDelete(event.id);
     }
+  }
+
+  async existsByCategoryId(categoryId: number): Promise<boolean> {
+    // Contar sólo eventos no eliminados y que NO estén en estado FINISHED.
+    // Así permitimos eliminar categorías si sus eventos están finalizados.
+    const count = await this.eventRepo.count({
+      where: { categoryId, deletedAt: IsNull(), status: Not(EventStatus.FINISHED) },
+    });
+    return count > 0;
   }
 }

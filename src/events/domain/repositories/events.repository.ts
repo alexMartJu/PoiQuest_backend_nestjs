@@ -13,6 +13,8 @@ export abstract class EventsRepository {
   abstract findOneByUuidIncludingDeleted(uuid: string): Promise<EventEntity | null>;
 
   abstract findOneByUuid(uuid: string): Promise<EventEntity | null>;
+  /** Devuelve true si existe al menos un evento no eliminado asociado a la categoría */
+  abstract existsByCategoryId(categoryId: number): Promise<boolean>;
   abstract create(data: Partial<EventEntity>): EventEntity;
   abstract save(event: EventEntity): Promise<EventEntity>;
   abstract softDeleteById(id: number): Promise<void>;

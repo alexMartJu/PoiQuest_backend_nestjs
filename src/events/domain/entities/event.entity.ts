@@ -1,5 +1,5 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn,
+  Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, CreateDateColumn,
   UpdateDateColumn, DeleteDateColumn, Index, BeforeInsert
 } from 'typeorm';
 import { randomUUID } from 'crypto';
@@ -7,7 +7,7 @@ import { PointOfInterestEntity } from '../../../entities/point-of-interest.entit
 import { TimeSlotEntity } from '../../../entities/time-slot.entity';
 import { TicketEntity } from '../../../entities/ticket.entity';
 import { RouteEntity } from '../../../entities/route.entity';
-import { EventType } from '../enums/event-type.enum';
+import { EventCategoryEntity } from './event-category.entity';
 import { EventStatus } from '../enums/event-status.enum';
 
 @Entity({ name: 'event' })
@@ -26,8 +26,8 @@ export class EventEntity {
   @Column({ type: 'text', nullable: true })
   description?: string | null;
 
-  @Column({ type: 'enum', enum: EventType })
-  type!: EventType;
+  @Column({ name: 'category_id', type: 'int' })
+  categoryId!: number;
 
   @Column({ type: 'enum', enum: EventStatus, default: EventStatus.ACTIVE })
   status!: EventStatus;
@@ -51,6 +51,10 @@ export class EventEntity {
   deletedAt?: Date | null;
 
   // --- Relations ---
+  @ManyToOne(() => EventCategoryEntity, (category) => category.events, { nullable: false })
+  @JoinColumn({ name: 'category_id' })
+  category!: EventCategoryEntity;
+
   @OneToMany(() => PointOfInterestEntity, (poi) => poi.event)
   pointsOfInterest!: PointOfInterestEntity[];
 
