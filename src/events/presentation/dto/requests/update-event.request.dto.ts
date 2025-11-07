@@ -1,6 +1,5 @@
-import { IsString, IsEnum, IsOptional, MaxLength, IsDateString } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsDateString, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { EventType } from '../../../domain/enums/event-type.enum';
 
 export class UpdateEventRequest {
   @ApiPropertyOptional({ maxLength: 150, description: 'Nombre del evento' })
@@ -14,10 +13,10 @@ export class UpdateEventRequest {
   @IsOptional()
   description?: string | null;
 
-  @ApiPropertyOptional({ enum: EventType, description: 'Tipo de evento' })
-  @IsEnum(EventType)
+  @ApiPropertyOptional({ description: 'UUID de la categoría del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @IsUUID()
   @IsOptional()
-  type?: EventType;
+  categoryUuid?: string;
 
   @ApiPropertyOptional({ maxLength: 255, description: 'Ubicación del evento', nullable: true })
   @IsString()

@@ -1,5 +1,6 @@
 import { EventEntity } from '../../domain/entities/event.entity';
 import { EventResponse } from '../dto/responses/event.response.dto';
+import { EventCategoryMapper } from './event-category.mapper';
 
 export class EventMapper {
   static toResponse(event: EventEntity): EventResponse {
@@ -7,7 +8,7 @@ export class EventMapper {
       uuid: event.uuid,
       name: event.name,
       description: event.description ?? null,
-      type: event.type,
+      category: EventCategoryMapper.toResponse(event.category) ?? null,
       status: event.status,
       location: event.location ?? null,
       startDate: event.startDate,

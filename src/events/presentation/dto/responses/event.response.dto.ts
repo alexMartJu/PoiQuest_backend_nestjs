@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EventType } from '../../../domain/enums/event-type.enum';
 import { EventStatus } from '../../../domain/enums/event-status.enum';
+import { EventCategoryResponse } from './event-category.response.dto';
 
 export class EventResponse {
   @ApiProperty({ description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -12,8 +12,8 @@ export class EventResponse {
   @ApiPropertyOptional({ description: 'Descripción del evento', nullable: true })
   description!: string | null;
 
-  @ApiProperty({ enum: EventType, description: 'Tipo de evento' })
-  type!: EventType;
+  @ApiPropertyOptional({ type: EventCategoryResponse, description: 'Categoría del evento', nullable: true })
+  category!: EventCategoryResponse | null;
 
   @ApiProperty({ enum: EventStatus, description: 'Estado del evento (active/finished)' })
   status!: EventStatus;
