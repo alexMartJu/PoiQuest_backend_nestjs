@@ -9,6 +9,7 @@ import { ProfileEntity } from './entities/profile.entity';
 import { RoleEntity } from './entities/role.entity';
 import { PermissionEntity } from './entities/permission.entity';
 import { BlacklistTokenEntity } from './entities/blacklist-token.entity';
+import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './entities/point-of-interest.entity';
 import { TimeSlotEntity } from './entities/time-slot.entity';
@@ -42,6 +43,7 @@ import { EventsModule } from './events/events.module';
           RoleEntity,
           PermissionEntity,
           BlacklistTokenEntity,
+          EventCategoryEntity,
           EventEntity,
           PointOfInterestEntity,
           TimeSlotEntity,
