@@ -1,9 +1,11 @@
 import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
 import * as bcrypt from 'bcryptjs';
+import { promisify } from 'util';
 import userData from '../../../data/users';
-import { UserEntity, UserStatus } from '../../../entities/user.entity';
-import { RoleEntity } from '../../../entities/role.entity';
+import { UserEntity } from '../../../users/domain/entities/user.entity';
+import { UserStatus } from '../../../users/domain/enums/user-status.enum';
+import { RoleEntity } from '../../../users/domain/entities/role.entity';
 import { ProfileEntity } from '../../../entities/profile.entity';
 
 export class UserSeeder implements Seeder {
@@ -19,12 +21,14 @@ export class UserSeeder implements Seeder {
         continue;
       }
 
-      const hashedPassword = await bcrypt.hash(user.password, 10);
+  const hash = promisify(bcrypt.hash) as (data: string, saltOrRounds: number) => Promise<string>;
+  const hashedPassword = await hash(user.password, 12);
 
       const userEntity = userRepo.create({
         email: user.email,
         password: hashedPassword,
         status: UserStatus.ACTIVE,
+        tokenVersion: 1,
         roles: [role],
       });
 

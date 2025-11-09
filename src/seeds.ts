@@ -4,11 +4,10 @@ import { SeederOptions, runSeeders } from 'typeorm-extension';
 import { config } from 'dotenv';
 
 // Entities
-import { UserEntity } from './entities/user.entity';
-import { RoleEntity } from './entities/role.entity';
-import { PermissionEntity } from './entities/permission.entity';
+import { UserEntity } from './users/domain/entities/user.entity';
+import { RoleEntity } from './users/domain/entities/role.entity';
 import { ProfileEntity } from './entities/profile.entity';
-import { BlacklistTokenEntity } from './entities/blacklist-token.entity';
+import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
 import { PointOfInterestEntity } from './entities/point-of-interest.entity';
@@ -42,7 +41,6 @@ const options: DataSourceOptions & SeederOptions = {
     UserEntity,
     RoleEntity,
     ProfileEntity,
-    PermissionEntity,
     BlacklistTokenEntity,
     EventCategoryEntity,
     EventEntity,

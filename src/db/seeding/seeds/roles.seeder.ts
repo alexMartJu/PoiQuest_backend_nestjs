@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
-import { RoleEntity } from '../../../entities/role.entity';
+import { RoleEntity } from '../../../users/domain/entities/role.entity';
 import roleData from '../../../data/roles';
 
 export class RoleSeeder implements Seeder {
