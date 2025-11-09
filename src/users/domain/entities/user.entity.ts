@@ -2,17 +2,12 @@ import {
   Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToMany, JoinTable,
   CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index
 } from 'typeorm';
-import { ProfileEntity } from './profile.entity';
-import { BlacklistTokenEntity } from './blacklist-token.entity';
+import { ProfileEntity } from '../../../entities/profile.entity';
+import { BlacklistTokenEntity } from '../../../auth/domain/entities/blacklist-token.entity';
 import { RoleEntity } from './role.entity';
-import { NotificationEntity } from './notification.entity';
-import { IncidentEntity } from './incident.entity';
-
-export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  PENDING = 'pending',
-}
+import { NotificationEntity } from '../../../entities/notification.entity';
+import { IncidentEntity } from '../../../entities/incident.entity';
+import { UserStatus } from '../enums/user-status.enum';
 
 @Entity({ name: 'user' })
 @Index('uq_user_email', ['email'], { unique: true })
@@ -26,8 +21,8 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 255 })
   password!: string;
 
-  @Column({ type: 'text', nullable: true })
-  refreshToken?: string | null;
+  @Column({ name: 'token_version', type: 'int', default: 1 })
+  tokenVersion!: number;
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status!: UserStatus;
