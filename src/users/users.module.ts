@@ -1,16 +1,20 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity } from './domain/entities/user.entity';
+import { RoleEntity } from './domain/entities/role.entity';
 import { ProfileEntity } from '../entities/profile.entity';
-import { RoleEntity } from '../entities/role.entity';
-
+import { UsersService } from './application/services/users.service';
+import { UsersRepository } from './domain/repositories/users.repository';
+import { TypeormUsersRepository } from './infrastructure/persistence/typeorm/typeorm-users.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, ProfileEntity, RoleEntity])],
-  providers: [UsersService],
-  controllers: [UsersController],
-  exports: [UsersService], // Exporta el servicio para usarlo en otros módulos
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, RoleEntity, ProfileEntity]),
+  ],
+  providers: [
+    UsersService,
+    { provide: UsersRepository, useClass: TypeormUsersRepository },
+  ],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}
