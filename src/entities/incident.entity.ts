@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn,
   CreateDateColumn, UpdateDateColumn, Index
 } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../users/domain/entities/user.entity';
 
 export enum IncidentType {
   PAYMENT = 'payment',

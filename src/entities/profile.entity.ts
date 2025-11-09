@@ -3,7 +3,7 @@ import {
   UpdateDateColumn, DeleteDateColumn, BeforeInsert, OneToMany, Index
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../users/domain/entities/user.entity';
 import { TicketEntity } from './ticket.entity';
 import { ScanEntity } from './scan.entity';
 import { UserAchievementEntity } from './user-achievement.entity';
