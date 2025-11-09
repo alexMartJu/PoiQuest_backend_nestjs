@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 //Entities
-import { UserEntity } from './entities/user.entity';
+import { UserEntity } from './users/domain/entities/user.entity';
 import { ProfileEntity } from './entities/profile.entity';
-import { RoleEntity } from './entities/role.entity';
-import { PermissionEntity } from './entities/permission.entity';
-import { BlacklistTokenEntity } from './entities/blacklist-token.entity';
+import { RoleEntity } from './users/domain/entities/role.entity';
+import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.entity';
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './entities/point-of-interest.entity';
@@ -26,9 +26,14 @@ import { IncidentEntity } from './entities/incident.entity';
 //Modules
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'mysql',
@@ -41,7 +46,6 @@ import { EventsModule } from './events/events.module';
           UserEntity,
           ProfileEntity,
           RoleEntity,
-          PermissionEntity,
           BlacklistTokenEntity,
           EventCategoryEntity,
           EventEntity,
@@ -61,6 +65,7 @@ import { EventsModule } from './events/events.module';
         autoLoadEntities: true, // Permite cargar automáticamente las entidades
       }),
     }),
+    AuthModule,
     UsersModule,
     EventsModule,
   ],
