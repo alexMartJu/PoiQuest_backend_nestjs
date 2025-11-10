@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EventStatus } from '../../../domain/enums/event-status.enum';
 import { EventCategoryResponse } from './event-category.response.dto';
+import { PointOfInterestResponse } from './point-of-interest.response.dto';
 
 export class EventResponse {
   @ApiProperty({ description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -30,6 +31,13 @@ export class EventResponse {
     nullable: true 
   })
   endDate!: string | null;
+
+  @ApiPropertyOptional({ 
+    type: [PointOfInterestResponse], 
+    description: 'Lista de puntos de interés asociados al evento',
+    nullable: true
+  })
+  pointsOfInterest?: Omit<PointOfInterestResponse, 'event'>[] | null;
 
   @ApiProperty({ 
     description: 'Fecha de creación en ISO 8601',

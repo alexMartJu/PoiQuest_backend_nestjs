@@ -1,10 +1,11 @@
 import { EventEntity } from '../../domain/entities/event.entity';
 import { EventResponse } from '../dto/responses/event.response.dto';
 import { EventCategoryMapper } from './event-category.mapper';
+import { PointOfInterestMapper } from './point-of-interest.mapper';
 
 export class EventMapper {
-  static toResponse(event: EventEntity): EventResponse {
-    return {
+  static toResponse(event: EventEntity, includePois = false): EventResponse {
+    const response: EventResponse = {
       uuid: event.uuid,
       name: event.name,
       description: event.description ?? null,
@@ -16,9 +17,16 @@ export class EventMapper {
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
     };
+
+    // Incluir POIs solo si se solicita y están cargados
+    if (includePois && event.pointsOfInterest) {
+      response.pointsOfInterest = PointOfInterestMapper.toResponseListWithoutEvent(event.pointsOfInterest);
+    }
+
+    return response;
   }
 
-  static toResponseList(list: EventEntity[]): EventResponse[] {
-    return list.map(EventMapper.toResponse);
+  static toResponseList(list: EventEntity[], includePois = false): EventResponse[] {
+    return list.map(event => EventMapper.toResponse(event, includePois));
   }
 }

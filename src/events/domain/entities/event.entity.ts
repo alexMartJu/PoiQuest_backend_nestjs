@@ -3,7 +3,7 @@ import {
   UpdateDateColumn, DeleteDateColumn, Index, BeforeInsert
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { PointOfInterestEntity } from '../../../entities/point-of-interest.entity';
+import { PointOfInterestEntity } from './point-of-interest.entity';
 import { TimeSlotEntity } from '../../../entities/time-slot.entity';
 import { TicketEntity } from '../../../entities/ticket.entity';
 import { RouteEntity } from '../../../entities/route.entity';

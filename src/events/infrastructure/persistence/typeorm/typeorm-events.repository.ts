@@ -35,7 +35,7 @@ export class TypeormEventsRepository implements EventsRepository {
   async findOneByUuid(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
       where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
-      relations: ['category'],
+      relations: ['category', 'pointsOfInterest'],
     });
   }
 
