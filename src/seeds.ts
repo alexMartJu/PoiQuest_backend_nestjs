@@ -10,7 +10,7 @@ import { ProfileEntity } from './profile/domain/entities/profile.entity';
 import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
-import { PointOfInterestEntity } from './entities/point-of-interest.entity';
+import { PointOfInterestEntity } from './events/domain/entities/point-of-interest.entity';
 import { TimeSlotEntity } from './entities/time-slot.entity';
 import { TicketEntity } from './entities/ticket.entity';
 import { PaymentEntity } from './entities/payment.entity';
@@ -27,6 +27,7 @@ import { RoleSeeder } from './db/seeding/seeds/roles.seeder';
 import { UserSeeder } from './db/seeding/seeds/users.seeder';
 import { EventCategorySeeder } from './db/seeding/seeds/event-categories.seeder';
 import { EventSeeder } from './db/seeding/seeds/events.seeder';
+import { PointOfInterestSeeder } from './db/seeding/seeds/points-of-interest.seeder';
 
 config();
 
@@ -56,7 +57,7 @@ const options: DataSourceOptions & SeederOptions = {
     NotificationEntity,
     IncidentEntity,
   ],
-  seeds: [RoleSeeder, UserSeeder, EventCategorySeeder, EventSeeder],
+  seeds: [RoleSeeder, UserSeeder, EventCategorySeeder, EventSeeder, PointOfInterestSeeder],
 };
 
 const dataSource = new DataSource(options);
