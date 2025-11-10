@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index
 } from 'typeorm';
 import { ProfileEntity } from '../profile/domain/entities/profile.entity';
-import { PointOfInterestEntity } from './point-of-interest.entity';
+import { PointOfInterestEntity } from '../events/domain/entities/point-of-interest.entity';
 
 @Entity({ name: 'scan' })
 @Index('idx_scan_profile', ['profileId'])

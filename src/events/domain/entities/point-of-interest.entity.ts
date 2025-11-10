@@ -3,11 +3,14 @@ import {
   UpdateDateColumn, DeleteDateColumn, BeforeInsert, OneToMany, Index
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { EventEntity } from '../events/domain/entities/event.entity';
-import { ScanEntity } from './scan.entity';
+import { EventEntity } from './event.entity';
+import { ScanEntity } from '../../../entities/scan.entity';
 
 @Entity({ name: 'point_of_interest' })
+@Index('uq_poi_uuid', ['uuid'], { unique: true })
 @Index('idx_poi_event', ['eventId'])
+@Index('uq_poi_qr_code', ['qrCode'], { unique: true })
+@Index('uq_poi_nfc_tag', ['nfcTag'], { unique: true })
 export class PointOfInterestEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -15,17 +18,8 @@ export class PointOfInterestEntity {
   @Column({ type: 'char', length: 36, unique: true })
   uuid!: string;
 
-  @BeforeInsert()
-  setUuid() {
-    if (!this.uuid) this.uuid = randomUUID();
-  }
-
   @Column({ name: 'event_id', type: 'int' })
   eventId!: number;
-
-  @ManyToOne(() => EventEntity, (e) => e.pointsOfInterest, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'event_id' })
-  event!: EventEntity;
 
   @Column({ type: 'varchar', length: 255 })
   title!: string;
@@ -36,7 +30,25 @@ export class PointOfInterestEntity {
   @Column({ type: 'text', nullable: true })
   description?: string | null;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({
+    type: 'longtext',
+    nullable: true,
+    collation: 'utf8mb4_bin',
+    transformer: {
+      to: (val: Record<string, any> | null) => {
+        return val === null || val === undefined ? null : JSON.stringify(val);
+      },
+      from: (val: string | null) => {
+        if (val === null || val === undefined) return null;
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          // Si el contenido no es JSON válido, devolvemos null para evitar excepciones
+          return null;
+        }
+      },
+    },
+  })
   multimedia?: Record<string, any> | null;
 
   @Column({ name: 'qr_code', type: 'varchar', length: 255, unique: true })
@@ -61,6 +73,18 @@ export class PointOfInterestEntity {
   deletedAt?: Date | null;
 
   // --- Relations ---
+  @ManyToOne(() => EventEntity, (e) => e.pointsOfInterest, { nullable: false })
+  @JoinColumn({ name: 'event_id' })
+  event!: EventEntity;
+
   @OneToMany(() => ScanEntity, (s) => s.poi)
   scans!: ScanEntity[];
+
+  // --- Hooks ---
+  @BeforeInsert()
+  setUuid() {
+    if (!this.uuid) {
+      this.uuid = randomUUID();
+    }
+  }
 }
