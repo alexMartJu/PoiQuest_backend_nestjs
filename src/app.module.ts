@@ -6,7 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 
 //Entities
 import { UserEntity } from './users/domain/entities/user.entity';
-import { ProfileEntity } from './entities/profile.entity';
+import { ProfileEntity } from './profile/domain/entities/profile.entity';
 import { RoleEntity } from './users/domain/entities/role.entity';
 import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.entity';
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
@@ -27,6 +27,7 @@ import { IncidentEntity } from './entities/incident.entity';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
     UsersModule,
     EventsModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

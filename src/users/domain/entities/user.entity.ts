@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToMany, JoinTable,
   CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index
 } from 'typeorm';
-import { ProfileEntity } from '../../../entities/profile.entity';
+import { ProfileEntity } from '../../../profile/domain/entities/profile.entity';
 import { BlacklistTokenEntity } from '../../../auth/domain/entities/blacklist-token.entity';
 import { RoleEntity } from './role.entity';
 import { NotificationEntity } from '../../../entities/notification.entity';

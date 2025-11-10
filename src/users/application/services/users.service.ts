@@ -6,7 +6,8 @@ import { UsersRepository } from '../../domain/repositories/users.repository';
 import { UserEntity } from '../../domain/entities/user.entity';
 import { UserStatus } from '../../domain/enums/user-status.enum';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { ProfileEntity } from '../../../entities/profile.entity';
+import { ProfileEntity } from '../../../profile/domain/entities/profile.entity';
+import { ProfileRepository } from '../../../profile/domain/repositories/profile.repository';
 import { ConflictError } from '../../../shared/errors/conflict.error';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
@@ -16,11 +17,61 @@ export class UsersService {
   constructor(
     private readonly usersRepo: UsersRepository,
     private readonly dataSource: DataSource,
+    private readonly profileRepo: ProfileRepository,
   ) {}
 
-  // Devuelve la lista completa de usuarios registrados
+  // Devuelve la lista completa de usuarios registrados (todos los estados)
   async findAll(): Promise<UserEntity[]> {
     return await this.usersRepo.findAll();
+  }
+
+  // Devuelve solo usuarios con status ACTIVE
+  async findAllActive(): Promise<UserEntity[]> {
+    return await this.usersRepo.findAllByStatus(UserStatus.ACTIVE);
+  }
+
+  // Devuelve solo usuarios con status DISABLED
+  async findAllDisabled(): Promise<UserEntity[]> {
+    return await this.usersRepo.findAllByStatus(UserStatus.DISABLED);
+  }
+
+  // Deshabilita una cuenta de usuario (cambiar status a DISABLED)
+  // (Se usan métodos basados en profile.uuid para enable/disable; keep findUserByIdOrFail for auth usage)
+  // --- Operaciones por profile.uuid ---
+  async disableUserByProfileUuid(profileUuid: string): Promise<UserEntity> {
+    const profile = await this.profileRepo.findOneByUuid(profileUuid);
+    if (!profile) {
+      throw new NotFoundError('Perfil no encontrado');
+    }
+
+    const user = profile.user ?? (await this.usersRepo.findOneById(profile.userId));
+    if (!user) {
+      throw new NotFoundError('Usuario asociado al perfil no encontrado');
+    }
+
+    user.status = UserStatus.DISABLED;
+    return await this.usersRepo.save(user);
+  }
+
+  // Activa una cuenta de usuario (cambiar status a ACTIVE)
+  async enableUserByProfileUuid(profileUuid: string): Promise<UserEntity> {
+    const profile = await this.profileRepo.findOneByUuid(profileUuid);
+    if (!profile) {
+      throw new NotFoundError('Perfil no encontrado');
+    }
+
+    const user = profile.user ?? (await this.usersRepo.findOneById(profile.userId));
+    if (!user) {
+      throw new NotFoundError('Usuario asociado al perfil no encontrado');
+    }
+
+    user.status = UserStatus.ACTIVE;
+    return await this.usersRepo.save(user);
+  }
+
+  // Registra un usuario con rol ticket_validator (solo admin)
+  async registerValidator(dto: Omit<CreateUserDto, 'roleName'>): Promise<UserEntity> {
+    return await this.createUser({ ...dto, roleName: 'ticket_validator' });
   }
 
   // Crea un usuario y su perfil en una única transacción para asegurar
@@ -55,8 +106,11 @@ export class UsersService {
       profile.lastname = dto.lastname;
       profile.avatarUrl = dto.avatarUrl ?? 'https://static.productionready.io/images/smiley-cyrus.jpg';
       profile.bio = dto.bio ?? null;
+      profile.totalPoints = 0;
+      profile.level = 1;
 
-      await manager.getRepository(ProfileEntity).save(profile);
+      // Usar el repositorio para persistir participando en la transacción
+      await this.profileRepo.saveWithManager(manager, profile);
 
       // Recarga usuario con relaciones
       const reloaded = await manager.getRepository(UserEntity).findOne({

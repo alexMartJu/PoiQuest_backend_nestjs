@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UsersRepository } from '../../../domain/repositories/users.repository';
 import { UserEntity } from '../../../domain/entities/user.entity';
 import { RoleEntity } from '../../../domain/entities/role.entity';
+import { UserStatus } from '../../../domain/enums/user-status.enum';
 
 @Injectable()
 export class TypeormUsersRepository implements UsersRepository {
@@ -17,7 +18,15 @@ export class TypeormUsersRepository implements UsersRepository {
   async findAll(): Promise<UserEntity[]> {
     return await this.userRepo.find({ 
       relations: ['roles', 'profile'],
-      order: { createdAt: 'DESC' } 
+      order: { createdAt: 'ASC' } 
+    });
+  }
+
+  async findAllByStatus(status: UserStatus): Promise<UserEntity[]> {
+    return await this.userRepo.find({
+      where: { status },
+      relations: ['roles', 'profile'],
+      order: { createdAt: 'ASC' }
     });
   }
 

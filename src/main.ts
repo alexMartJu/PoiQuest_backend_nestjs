@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ErrorResponse } from './shared/dto/error.response.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from './shared/filters/http-exception.filter';
 
@@ -30,7 +31,9 @@ async function bootstrap() {
       .addBearerAuth()
       .build();
 
-    const document = SwaggerModule.createDocument(app, config);
+    const document = SwaggerModule.createDocument(app, config, {
+      extraModels: [ErrorResponse],
+    });
     SwaggerModule.setup('docs', app, document);
 
     console.log('Swagger habilitado en /docs');
