@@ -6,7 +6,7 @@ import userData from '../../../data/users';
 import { UserEntity } from '../../../users/domain/entities/user.entity';
 import { UserStatus } from '../../../users/domain/enums/user-status.enum';
 import { RoleEntity } from '../../../users/domain/entities/role.entity';
-import { ProfileEntity } from '../../../entities/profile.entity';
+import { ProfileEntity } from '../../../profile/domain/entities/profile.entity';
 
 export class UserSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<void> {
@@ -21,8 +21,8 @@ export class UserSeeder implements Seeder {
         continue;
       }
 
-  const hash = promisify(bcrypt.hash) as (data: string, saltOrRounds: number) => Promise<string>;
-  const hashedPassword = await hash(user.password, 12);
+      const hash = promisify(bcrypt.hash) as (data: string, saltOrRounds: number) => Promise<string>;
+      const hashedPassword = await hash(user.password, 12);
 
       const userEntity = userRepo.create({
         email: user.email,
@@ -38,6 +38,8 @@ export class UserSeeder implements Seeder {
         ...user.profile,
         user: savedUser,
         userId: savedUser.id,
+        totalPoints: 0,
+        level: 1,
       });
 
       await profileRepo.save(profileEntity);

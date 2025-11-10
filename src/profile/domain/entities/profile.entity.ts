@@ -3,10 +3,10 @@ import {
   UpdateDateColumn, DeleteDateColumn, BeforeInsert, OneToMany, Index
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { UserEntity } from '../users/domain/entities/user.entity';
-import { TicketEntity } from './ticket.entity';
-import { ScanEntity } from './scan.entity';
-import { UserAchievementEntity } from './user-achievement.entity';
+import { UserEntity } from '../../../users/domain/entities/user.entity';
+import { TicketEntity } from '../../../entities/ticket.entity';
+import { ScanEntity } from '../../../entities/scan.entity';
+import { UserAchievementEntity } from '../../../entities/user-achievement.entity';
 
 @Entity({ name: 'profile' })
 @Index('uq_profile_uuid', ['uuid'], { unique: true })
@@ -41,6 +41,12 @@ export class ProfileEntity {
 
   @Column({ name: 'bio', type: 'text', nullable: true })
   bio?: string | null;
+
+  @Column({ name: 'total_points', type: 'int', default: 0 })
+  totalPoints!: number;
+
+  @Column({ name: 'level', type: 'int', default: 1 })
+  level!: number;
 
   @Column({ name: 'preferences', type: 'json', nullable: true })
   preferences?: Record<string, any> | null;

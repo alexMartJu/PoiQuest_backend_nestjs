@@ -6,7 +6,7 @@ import { config } from 'dotenv';
 // Entities
 import { UserEntity } from './users/domain/entities/user.entity';
 import { RoleEntity } from './users/domain/entities/role.entity';
-import { ProfileEntity } from './entities/profile.entity';
+import { ProfileEntity } from './profile/domain/entities/profile.entity';
 import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
