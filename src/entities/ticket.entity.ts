@@ -3,7 +3,7 @@ import {
   UpdateDateColumn, BeforeInsert, Index, OneToMany
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { ProfileEntity } from './profile.entity';
+import { ProfileEntity } from '../profile/domain/entities/profile.entity';
 import { EventEntity } from '../events/domain/entities/event.entity';
 import { TimeSlotEntity } from './time-slot.entity';
 import { PaymentEntity } from './payment.entity';
