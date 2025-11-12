@@ -1,4 +1,5 @@
 import { EventEntity } from '../entities/event.entity';
+import { PaginatedResult } from '../types/pagination';
 
 export abstract class EventsRepository {
   abstract findAll(): Promise<EventEntity[]>;
@@ -13,6 +14,19 @@ export abstract class EventsRepository {
   abstract findOneByUuidIncludingDeleted(uuid: string): Promise<EventEntity | null>;
 
   abstract findOneByUuid(uuid: string): Promise<EventEntity | null>;
+  
+  /**
+   * Obtiene eventos activos de una categoría específica con paginación basada en cursor.
+   * @param categoryUuid UUID de la categoría
+   * @param cursor Timestamp ISO del último evento de la página anterior (opcional)
+   * @param limit Número de eventos a devolver
+   */
+  abstract findByCategoryWithCursor(
+    categoryUuid: string, 
+    cursor: string | undefined, 
+    limit: number
+  ): Promise<PaginatedResult>;
+  
   /** Devuelve true si existe al menos un evento no eliminado asociado a la categoría */
   abstract existsByCategoryId(categoryId: number): Promise<boolean>;
   abstract create(data: Partial<EventEntity>): EventEntity;
