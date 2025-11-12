@@ -5,6 +5,8 @@ import { EventEntity } from '../../domain/entities/event.entity';
 import { EventStatus } from '../../domain/enums/event-status.enum';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
+import { CursorPaginationDto } from '../dto/cursor-pagination.dto';
+import { PaginatedEventsDto } from '../dto/paginated-events.dto';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
 
@@ -37,6 +39,31 @@ export class EventsService {
       throw new NotFoundError('Evento finalizado no encontrado', { uuid });
     }
     return event;
+  }
+
+  /// Obtiene eventos activos de una categoría con paginación basada en cursor
+  async findByCategoryWithCursor(
+    categoryUuid: string,
+    pagination: CursorPaginationDto,
+  ): Promise<PaginatedEventsDto> {
+    // Validar que la categoría existe y no está eliminada
+    const category = await this.categoriesRepo.findOneByUuid(categoryUuid);
+    if (!category) {
+      throw new NotFoundError('Categoría no encontrada', { categoryUuid });
+    }
+
+    const limit = pagination.limit ?? 3;
+    const result = await this.eventsRepo.findByCategoryWithCursor(
+      categoryUuid,
+      pagination.cursor,
+      limit,
+    );
+
+    return {
+      data: result.data,
+      nextCursor: result.nextCursor,
+      hasNextPage: result.hasNextPage,
+    };
   }
 
   /// Crea un nuevo evento

@@ -14,12 +14,16 @@ export class EventSeeder implements Seeder {
     const categoryMap = new Map(categories.map(cat => [cat.name.toLowerCase(), cat.id]));
 
     // Crear eventos con las categorías correspondientes
-    const events = eventsData.map((eventData) => {
+    // Añadimos un pequeño offset de 1 ms por índice para evitar timestamps idénticos
+    const baseTime = Date.now();
+    const events = eventsData.map((eventData, idx) => {
       const categoryId = categoryMap.get(eventData.categoryName.toLowerCase());
       if (!categoryId) {
         throw new Error(`Category not found: ${eventData.categoryName}`);
       }
-      
+
+      const ts = new Date(baseTime + idx * 1); // offset 1 ms por fila
+
       return eventRepo.create({
         name: eventData.name,
         description: eventData.description,
@@ -28,6 +32,8 @@ export class EventSeeder implements Seeder {
         location: eventData.location,
         startDate: eventData.startDate,
         endDate: eventData.endDate,
+        createdAt: ts,
+        updatedAt: ts,
       });
     });
     

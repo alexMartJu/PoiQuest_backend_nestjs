@@ -1,16 +1,18 @@
 import { 
   Controller, Get, Post, Body, Patch, Param, Delete, 
-  HttpCode, HttpStatus, UseGuards
+  HttpCode, HttpStatus, UseGuards, Query
 } from '@nestjs/common';
 import { EventsService } from '../../application/services/events.service';
 import { CreateEventRequest } from '../dto/requests/create-event.request.dto';
 import { UpdateEventRequest } from '../dto/requests/update-event.request.dto';
+import { CursorPaginationRequest } from '../dto/requests/cursor-pagination.request.dto';
 import { EventResponse } from '../dto/responses/event.response.dto';
+import { PaginatedEventsResponse } from '../dto/responses/paginated-events.response.dto';
 import { EventMapper } from '../mappers/event.mapper';
 import { 
   ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse, 
-  ApiNotFoundResponse, ApiBadRequestResponse, ApiConflictResponse, ApiBody, ApiParam,
-  ApiBearerAuth, ApiUnauthorizedResponse, ApiForbiddenResponse
+  ApiNotFoundResponse, ApiBadRequestResponse, ApiConflictResponse, ApiBody, ApiParam, ApiQuery,
+  ApiBearerAuth, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiInternalServerErrorResponse
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -23,9 +25,43 @@ import { ErrorResponse } from '../../../shared/dto/error.response.dto';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  @ApiOperation({ 
+    summary: 'Lista de eventos activos de una categoría con paginación basada en cursor',
+    description: 'Obtiene eventos activos filtrados por categoría usando paginación basada en cursor (createdAt). Devuelve eventos ordenados del más antiguo al más reciente.'
+  })
+  @ApiParam({ 
+    name: 'categoryUuid', 
+    description: 'UUID de la categoría para filtrar eventos', 
+    example: '550e8400-e29b-41d4-a716-446655440000' 
+  })
+  @ApiOkResponse({ type: PaginatedEventsResponse, description: 'Lista paginada de eventos activos de la categoría' })
+  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Categoría no encontrada' })
+  @ApiBadRequestResponse({ type: ErrorResponse, description: 'Parámetros de paginación inválidos' })
+  @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor ISO 8601 para paginación (createdAt). Usar el valor devuelto en nextCursor para continuar.', example: '2025-03-09T12:34:56.000Z' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de items por página. Default 3', example: 3 })
+  @ApiInternalServerErrorResponse({ type: ErrorResponse, description: 'Error interno del servidor' })
+  @Public()
+  @Get('category/:categoryUuid')
+  async getEventsByCategory(
+    @Param('categoryUuid') categoryUuid: string,
+    @Query() pagination: CursorPaginationRequest,
+  ): Promise<PaginatedEventsResponse> {
+    const result = await this.eventsService.findByCategoryWithCursor(categoryUuid, pagination);
+    
+    return {
+      data: EventMapper.toResponseList(result.data),
+      nextCursor: result.nextCursor,
+      hasNextPage: result.hasNextPage,
+    };
+  }
+
   @ApiOperation({ summary: 'Lista de todos los eventos activos' })
   @ApiOkResponse({ type: EventResponse, isArray: true, description: 'Lista de eventos activos' })
-  @Public()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
+  @ApiForbiddenResponse({ type: ErrorResponse, description: 'Acceso denegado: se requiere rol admin' })
   @Get()
   async getEvents(): Promise<EventResponse[]> {
     const entities = await this.eventsService.findAll();
