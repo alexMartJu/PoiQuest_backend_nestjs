@@ -1,11 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, Index } from 'typeorm';
-
-export enum ImageableType {
-  EVENT = 'event',
-  POI = 'poi',
-  ROUTE = 'route',
-  ACHIEVEMENT = 'achievement',
-}
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  DeleteDateColumn, 
+  Index 
+} from 'typeorm';
+import { ImageableType } from '../enums/imageable-type.enum';
 
 @Entity({ name: 'image' })
 @Index('idx_image_poly', ['imageableType', 'imageableId'])
