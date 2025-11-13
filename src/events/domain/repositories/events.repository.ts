@@ -1,5 +1,6 @@
 import { EventEntity } from '../entities/event.entity';
 import { PaginatedResult } from '../types/pagination';
+import { EntityManager } from 'typeorm';
 
 export abstract class EventsRepository {
   abstract findAll(): Promise<EventEntity[]>;
@@ -14,6 +15,11 @@ export abstract class EventsRepository {
   abstract findOneByUuidIncludingDeleted(uuid: string): Promise<EventEntity | null>;
 
   abstract findOneByUuid(uuid: string): Promise<EventEntity | null>;
+  /**
+   * Variante transaccional de `findOneByUuid` que usa un `EntityManager`
+   * para realizar la consulta dentro del contexto de una transacción.
+   */
+  abstract findOneByUuidWithManager(manager: EntityManager, uuid: string): Promise<EventEntity | null>;
   
   /**
    * Obtiene eventos activos de una categoría específica con paginación basada en cursor.

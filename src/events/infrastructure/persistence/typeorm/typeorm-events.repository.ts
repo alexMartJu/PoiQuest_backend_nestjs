@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, QueryFailedError, Not } from 'typeorm';
+import { Repository, IsNull, QueryFailedError, Not, EntityManager } from 'typeorm';
 import { EventsRepository } from '../../../domain/repositories/events.repository';
 import { PaginatedResult } from '../../../domain/types/pagination';
 import { EventEntity } from '../../../domain/entities/event.entity';
@@ -160,5 +160,12 @@ export class TypeormEventsRepository implements EventsRepository {
       nextCursor,
       hasNextPage,
     };
+  }
+
+  async findOneByUuidWithManager(manager: EntityManager, uuid: string): Promise<EventEntity | null> {
+    return await manager.getRepository(EventEntity).findOne({
+      where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
+      relations: ['category', 'pointsOfInterest'],
+    });
   }
 }
