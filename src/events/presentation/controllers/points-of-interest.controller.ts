@@ -12,6 +12,9 @@ import { CreatePointOfInterestRequest } from '../dto/requests/create-point-of-in
 import { UpdatePointOfInterestRequest } from '../dto/requests/update-point-of-interest.request.dto';
 import { PointOfInterestResponse } from '../dto/responses/point-of-interest.response.dto';
 import { PointOfInterestMapper } from '../mappers/point-of-interest.mapper';
+import { ImagesService } from '../../../media/application/services/images.service';
+import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
+import { buildImagesMap } from '../helpers/images-map.helper';
 import { ErrorResponse } from '../../../shared/dto/error.response.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -23,7 +26,10 @@ import { Public } from '../../../auth/infrastructure/decorators/public.decorator
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class PointsOfInterestController {
-  constructor(private readonly poisService: PointsOfInterestService) {}
+  constructor(
+    private readonly poisService: PointsOfInterestService,
+    private readonly imagesService: ImagesService,
+  ) {}
 
   @ApiOperation({ summary: 'Lista de todos los POIs (admin)' })
   @ApiOkResponse({ type: PointOfInterestResponse, isArray: true, description: 'Lista de POIs' })
@@ -33,7 +39,13 @@ export class PointsOfInterestController {
   @Get()
   async getPois(): Promise<PointOfInterestResponse[]> {
     const entities = await this.poisService.findAll();
-    return PointOfInterestMapper.toResponseList(entities);
+    
+    // Cargar imágenes para todos los POIs en una sola consulta (evita N+1)
+    const poiIds = entities.map(p => p.id);
+    const allImages = await this.imagesService.fetchImagesByIds(ImageableType.POI, poiIds);
+    const imagesMap = buildImagesMap(allImages);
+    
+    return PointOfInterestMapper.toResponseList(entities, imagesMap);
   }
 
   @ApiOperation({ summary: 'Detalle de un POI por uuid (público)' })
@@ -45,7 +57,8 @@ export class PointsOfInterestController {
   @Get(':uuid')
   async getPoi(@Param('uuid') uuid: string): Promise<PointOfInterestResponse> {
     const entity = await this.poisService.findOneByUuid(uuid);
-    return PointOfInterestMapper.toResponse(entity);
+    const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
+    return PointOfInterestMapper.toResponse(entity, images);
   }
 
   @ApiOperation({ summary: 'Crear un nuevo POI (admin)' })
@@ -59,7 +72,8 @@ export class PointsOfInterestController {
   @Post()
   async createPoi(@Body() dto: CreatePointOfInterestRequest): Promise<PointOfInterestResponse> {
     const entity = await this.poisService.createPoi(dto);
-    return PointOfInterestMapper.toResponse(entity);
+    const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
+    return PointOfInterestMapper.toResponse(entity, images);
   }
 
   @ApiOperation({ summary: 'Actualizar un POI por uuid (admin)' })
@@ -78,7 +92,8 @@ export class PointsOfInterestController {
     @Body() dto: UpdatePointOfInterestRequest
   ): Promise<PointOfInterestResponse> {
     const entity = await this.poisService.updateByUuid(uuid, dto);
-    return PointOfInterestMapper.toResponse(entity);
+    const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
+    return PointOfInterestMapper.toResponse(entity, images);
   }
 
   @ApiOperation({ summary: 'Eliminar un POI por uuid (soft delete) (admin)' })

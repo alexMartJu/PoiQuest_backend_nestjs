@@ -9,6 +9,9 @@ import { CursorPaginationRequest } from '../dto/requests/cursor-pagination.reque
 import { EventResponse } from '../dto/responses/event.response.dto';
 import { PaginatedEventsResponse } from '../dto/responses/paginated-events.response.dto';
 import { EventMapper } from '../mappers/event.mapper';
+import { ImagesService } from '../../../media/application/services/images.service';
+import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
+import { buildImagesMap } from '../helpers/images-map.helper';
 import { 
   ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse, 
   ApiNotFoundResponse, ApiBadRequestResponse, ApiConflictResponse, ApiBody, ApiParam, ApiQuery,
@@ -23,7 +26,10 @@ import { ErrorResponse } from '../../../shared/dto/error.response.dto';
 @ApiTags('events')
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly imagesService: ImagesService,
+  ) {}
 
   @ApiOperation({ 
     summary: 'Lista de eventos activos de una categoría con paginación basada en cursor',
@@ -48,8 +54,13 @@ export class EventsController {
   ): Promise<PaginatedEventsResponse> {
     const result = await this.eventsService.findByCategoryWithCursor(categoryUuid, pagination);
     
+    // Cargar imágenes para todos los eventos en una sola consulta (evita N+1)
+    const eventIds = result.data.map(e => e.id);
+    const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
+    const imagesMap = buildImagesMap(allImages);
+    
     return {
-      data: EventMapper.toResponseList(result.data),
+      data: EventMapper.toResponseList(result.data, false, imagesMap),
       nextCursor: result.nextCursor,
       hasNextPage: result.hasNextPage,
     };
@@ -65,7 +76,13 @@ export class EventsController {
   @Get()
   async getEvents(): Promise<EventResponse[]> {
     const entities = await this.eventsService.findAll();
-    return EventMapper.toResponseList(entities);
+    
+    // Cargar imágenes para todos los eventos en una sola consulta (evita N+1)
+    const eventIds = entities.map(e => e.id);
+    const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
+    const imagesMap = buildImagesMap(allImages);
+    
+    return EventMapper.toResponseList(entities, false, imagesMap);
   }
 
   @ApiOperation({ summary: 'Lista de eventos finalizados' })
@@ -78,7 +95,11 @@ export class EventsController {
   @Get('finished')
   async getFinishedEvents(): Promise<EventResponse[]> {
     const entities = await this.eventsService.findAllFinished();
-    return EventMapper.toResponseList(entities);
+    // Cargar imágenes para todos los eventos finalizados en una sola consulta (evita N+1)
+    const eventIds = entities.map(e => e.id);
+    const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
+    const imagesMap = buildImagesMap(allImages);
+    return EventMapper.toResponseList(entities, false, imagesMap);
   }
 
   @ApiOperation({ summary: 'Detalle de un evento activo por uuid (incluye POIs)' })
@@ -89,7 +110,8 @@ export class EventsController {
   @Get(':uuid')
   async getEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
     const entity = await this.eventsService.findOneByUuid(uuid);
-    return EventMapper.toResponse(entity, true); // true para incluir POIs
+    const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
+    return EventMapper.toResponse(entity, true, images); // true para incluir POIs
   }
 
   @ApiOperation({ summary: 'Detalle de un evento finalizado por uuid' })
@@ -104,7 +126,8 @@ export class EventsController {
   @Get('finished/:uuid')
   async getFinishedEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
     const entity = await this.eventsService.findFinishedByUuid(uuid);
-    return EventMapper.toResponse(entity);
+    const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
+    return EventMapper.toResponse(entity, false, images);
   }
 
   @ApiOperation({ summary: 'Crear un nuevo evento' })
@@ -121,7 +144,8 @@ export class EventsController {
   @Post()
   async createEvent(@Body() dto: CreateEventRequest): Promise<EventResponse> {
     const entity = await this.eventsService.createEvent(dto);
-    return EventMapper.toResponse(entity);
+    const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
+    return EventMapper.toResponse(entity, false, images);
   }
 
   @ApiOperation({ summary: 'Actualizar un evento por uuid' })
@@ -141,7 +165,8 @@ export class EventsController {
     @Body() dto: UpdateEventRequest
   ): Promise<EventResponse> {
     const entity = await this.eventsService.updateByUuid(uuid, dto);
-    return EventMapper.toResponse(entity);
+    const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
+    return EventMapper.toResponse(entity, false, images);
   }
 
   @ApiOperation({ summary: 'Eliminar un evento por uuid (soft delete)' })
