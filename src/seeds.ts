@@ -18,7 +18,7 @@ import { ScanEntity } from './entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';
 import { RouteEntity } from './entities/route.entity';
-import { ImageEntity } from './entities/image.entity';
+import { ImageEntity } from './media/domain/entities/image.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { IncidentEntity } from './entities/incident.entity';
 
