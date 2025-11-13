@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { PointsOfInterestRepository } from '../../domain/repositories/points-of-interest.repository';
 import { EventsRepository } from '../../domain/repositories/events.repository';
 import { PointOfInterestEntity } from '../../domain/entities/point-of-interest.entity';
@@ -7,12 +8,16 @@ import { UpdatePointOfInterestDto } from '../dto/update-point-of-interest.dto';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
 import { EventStatus } from '../../domain/enums/event-status.enum';
+import { ImagesService } from '../../../media/application/services/images.service';
+import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
 
 @Injectable()
 export class PointsOfInterestService {
   constructor(
     private readonly poisRepo: PointsOfInterestRepository,
     private readonly eventsRepo: EventsRepository,
+    private readonly imagesService: ImagesService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /// Obtiene todos los POIs (no eliminados)
@@ -44,19 +49,31 @@ export class PointsOfInterestService {
       throw new ValidationError('No se puede asociar un POI a un evento deshabilitado o no activo');
     }
 
-    const poi = this.poisRepo.create({
-      eventId: event.id,
-      title: dto.title,
-      author: dto.author ?? null,
-      description: dto.description ?? null,
-      multimedia: dto.multimedia ?? null,
-      qrCode: dto.qrCode,
-      nfcTag: dto.nfcTag ?? null,
-      coordX: dto.coordX ?? null,
-      coordY: dto.coordY ?? null,
-    });
+    // Usar transacción para crear POI e imágenes
+    return await this.dataSource.transaction(async (manager) => {
+      const poi = this.poisRepo.create({
+        eventId: event.id,
+        title: dto.title,
+        author: dto.author ?? null,
+        description: dto.description ?? null,
+        multimedia: dto.multimedia ?? null,
+        qrCode: dto.qrCode,
+        nfcTag: dto.nfcTag ?? null,
+        coordX: dto.coordX ?? null,
+        coordY: dto.coordY ?? null,
+      });
 
-    return await this.poisRepo.save(poi);
+      const saved = await manager.save(poi);
+
+      // Adjuntar imágenes (usar manager para atomicidad)
+      await this.imagesService.attachImages({
+        imageableType: ImageableType.POI,
+        imageableId: saved.id,
+        imageUrls: dto.imageUrls,
+      }, manager);
+
+      return saved;
+    });
   }
 
   /// Actualiza un POI existente por uuid
@@ -69,16 +86,30 @@ export class PointsOfInterestService {
       throw new ValidationError('No se puede actualizar un Point of Interest eliminado');
     }
 
-    if (dto.title !== undefined) poi.title = dto.title;
-    if (dto.author !== undefined) poi.author = dto.author ?? null;
-    if (dto.description !== undefined) poi.description = dto.description ?? null;
-    if (dto.multimedia !== undefined) poi.multimedia = dto.multimedia ?? null;
-    if (dto.qrCode !== undefined) poi.qrCode = dto.qrCode;
-    if (dto.nfcTag !== undefined) poi.nfcTag = dto.nfcTag ?? null;
-    if (dto.coordX !== undefined) poi.coordX = dto.coordX ?? null;
-    if (dto.coordY !== undefined) poi.coordY = dto.coordY ?? null;
+    // Usar transacción para actualizar POI e imágenes
+    return await this.dataSource.transaction(async (manager) => {
+      if (dto.title !== undefined) poi.title = dto.title;
+      if (dto.author !== undefined) poi.author = dto.author ?? null;
+      if (dto.description !== undefined) poi.description = dto.description ?? null;
+      if (dto.multimedia !== undefined) poi.multimedia = dto.multimedia ?? null;
+      if (dto.qrCode !== undefined) poi.qrCode = dto.qrCode;
+      if (dto.nfcTag !== undefined) poi.nfcTag = dto.nfcTag ?? null;
+      if (dto.coordX !== undefined) poi.coordX = dto.coordX ?? null;
+      if (dto.coordY !== undefined) poi.coordY = dto.coordY ?? null;
 
-    return await this.poisRepo.save(poi);
+      const saved = await manager.save(poi);
+
+      // Actualizar imágenes si se proporcionan
+      if (dto.imageUrls !== undefined) {
+        await this.imagesService.updateImages({
+          imageableType: ImageableType.POI,
+          imageableId: saved.id,
+          imageUrls: dto.imageUrls,
+        }, manager);
+      }
+
+      return saved;
+    });
   }
 
   /// Elimina un POI (soft delete) por uuid

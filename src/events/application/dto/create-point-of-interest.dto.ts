@@ -8,4 +8,5 @@ export interface CreatePointOfInterestDto {
   nfcTag?: string | null;
   coordX?: number | null;
   coordY?: number | null;
+  imageUrls: string[]; // Mínimo 1, máximo 2
 }

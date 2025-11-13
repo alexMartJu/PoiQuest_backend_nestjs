@@ -7,4 +7,5 @@ export interface UpdatePointOfInterestDto {
   nfcTag?: string | null;
   coordX?: number | null;
   coordY?: number | null;
+  imageUrls?: string[]; // Máximo 2
 }

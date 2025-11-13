@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { EventsRepository } from '../../domain/repositories/events.repository';
 import { EventCategoriesRepository } from '../../domain/repositories/event-categories.repository';
 import { EventEntity } from '../../domain/entities/event.entity';
@@ -9,12 +10,16 @@ import { CursorPaginationDto } from '../dto/cursor-pagination.dto';
 import { PaginatedEventsDto } from '../dto/paginated-events.dto';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
+import { ImagesService } from '../../../media/application/services/images.service';
+import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
 
 @Injectable()
 export class EventsService {
   constructor(
     private readonly eventsRepo: EventsRepository,
     private readonly categoriesRepo: EventCategoriesRepository,
+    private readonly imagesService: ImagesService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /// Obtiene todos los eventos activos (no eliminados)
@@ -76,24 +81,36 @@ export class EventsService {
       throw new NotFoundError('Categoría no encontrada', { categoryUuid: dto.categoryUuid });
     }
 
-    // Crea evento (uuid será generado automáticamente en la entidad)
-    const event = this.eventsRepo.create({
-      name: dto.name,
-      description: dto.description ?? null,
-      categoryId: (category as any).id,
-      status: EventStatus.ACTIVE, // Por defecto se crea como ACTIVE
-      location: dto.location ?? null,
-      startDate: dto.startDate,
-      endDate: dto.endDate ?? null,
-    });
+    // Usar transacción para crear evento e imágenes
+    return await this.dataSource.transaction(async (manager) => {
+      // Crea evento (uuid será generado automáticamente en la entidad)
+      const event = this.eventsRepo.create({
+        name: dto.name,
+        description: dto.description ?? null,
+        categoryId: (category as any).id,
+        status: EventStatus.ACTIVE, // Por defecto se crea como ACTIVE
+        location: dto.location ?? null,
+        startDate: dto.startDate,
+        endDate: dto.endDate ?? null,
+      });
 
-    const saved = await this.eventsRepo.save(event);
-    // Reconsultar para asegurarnos de que la relación `category` esté poblada
-    const savedWithRelations = await this.eventsRepo.findOneByUuid(saved.uuid);
-    if (!savedWithRelations) {
-      throw new NotFoundError('Evento creado no encontrado después de guardar', { uuid: saved.uuid });
-    }
-    return savedWithRelations;
+      const saved = await manager.save(event);
+
+      // Adjuntar imágenes (usar el mismo EntityManager para mantener atomicidad)
+      await this.imagesService.attachImages({
+        imageableType: ImageableType.EVENT,
+        imageableId: saved.id,
+        imageUrls: dto.imageUrls,
+      }, manager);
+
+      // Reconsultar usando el EntityManager para que la entidad recién guardada
+      // sea visible dentro de la misma transacción.
+      const savedWithRelations = await this.eventsRepo.findOneByUuidWithManager(manager, saved.uuid);
+      if (!savedWithRelations) {
+        throw new NotFoundError('Evento creado no encontrado después de guardar', { uuid: saved.uuid });
+      }
+      return savedWithRelations;
+    });
   }
 
   /// Actualiza un evento existente por uuid
@@ -112,36 +129,49 @@ export class EventsService {
       throw new ValidationError('Solo se pueden actualizar eventos con estado ACTIVE', { uuid, status: event.status });
     }
 
-    // Asigna campos permitidos
-    if (dto.name !== undefined) event.name = dto.name;
-    if (dto.description !== undefined) event.description = dto.description ?? null;
-  // placeholder removed: we will set categoryId and relation after validation when provided
-    if (dto.location !== undefined) event.location = dto.location ?? null;
-    if (dto.startDate !== undefined) event.startDate = dto.startDate;
-    if (dto.endDate !== undefined) event.endDate = dto.endDate ?? null;
+    // Usar transacción para actualizar evento e imágenes
+    return await this.dataSource.transaction(async (manager) => {
+      // Asigna campos permitidos
+      if (dto.name !== undefined) event.name = dto.name;
+      if (dto.description !== undefined) event.description = dto.description ?? null;
+      if (dto.location !== undefined) event.location = dto.location ?? null;
+      if (dto.startDate !== undefined) event.startDate = dto.startDate;
+      if (dto.endDate !== undefined) event.endDate = dto.endDate ?? null;
 
-    // Valida fechas si se actualizan
-    if (dto.startDate !== undefined || dto.endDate !== undefined) {
-      this.validateDates(event.startDate, event.endDate);
-    }
-
-    // Si se actualizó categoryUuid, validar que exista y asignar el categoryId interno
-    if (dto.categoryUuid !== undefined) {
-      const category = await this.categoriesRepo.findOneByUuid(dto.categoryUuid);
-      if (!category || (category as any).deletedAt) {
-        throw new NotFoundError('Categoría no encontrada', { categoryUuid: dto.categoryUuid });
+      // Valida fechas si se actualizan
+      if (dto.startDate !== undefined || dto.endDate !== undefined) {
+        this.validateDates(event.startDate, event.endDate);
       }
-      // Asignar tanto el FK como la relación para que TypeORM persista el cambio correctamente
-      event.categoryId = (category as any).id;
-      (event as any).category = category;
-    }
 
-    const saved = await this.eventsRepo.save(event);
-    const savedWithRelations = await this.eventsRepo.findOneByUuid(saved.uuid);
-    if (!savedWithRelations) {
-      throw new NotFoundError('Evento no encontrado después de actualizar', { uuid: saved.uuid });
-    }
-    return savedWithRelations;
+      // Si se actualizó categoryUuid, validar que exista y asignar el categoryId interno
+      if (dto.categoryUuid !== undefined) {
+        const category = await this.categoriesRepo.findOneByUuid(dto.categoryUuid);
+        if (!category || (category as any).deletedAt) {
+          throw new NotFoundError('Categoría no encontrada', { categoryUuid: dto.categoryUuid });
+        }
+        // Asignar tanto el FK como la relación para que TypeORM persista el cambio correctamente
+        event.categoryId = (category as any).id;
+        (event as any).category = category;
+      }
+
+      const saved = await manager.save(event);
+
+      // Actualizar imágenes si se proporcionan
+      if (dto.imageUrls !== undefined) {
+        await this.imagesService.updateImages({
+          imageableType: ImageableType.EVENT,
+          imageableId: saved.id,
+          imageUrls: dto.imageUrls,
+        }, manager);
+      }
+
+      // Reconsultar usando el EntityManager para asegurarnos que veamos los cambios
+      const savedWithRelations = await this.eventsRepo.findOneByUuidWithManager(manager, saved.uuid);
+      if (!savedWithRelations) {
+        throw new NotFoundError('Evento no encontrado después de actualizar', { uuid: saved.uuid });
+      }
+      return savedWithRelations;
+    });
   }
 
   /// Elimina un evento (soft delete) por uuid
