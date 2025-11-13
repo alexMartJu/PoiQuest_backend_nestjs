@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EventResponse } from './event.response.dto';
+import { ImageResponse } from '../../../../media/presentation/dto/image.response.dto';
 
 export class PointOfInterestResponse {
   @ApiProperty({ description: 'UUID único del POI', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -31,6 +32,13 @@ export class PointOfInterestResponse {
 
   @ApiPropertyOptional({ description: 'Coordenada Y del POI', nullable: true })
   coordY!: number | null;
+
+  @ApiPropertyOptional({ 
+    type: [ImageResponse], 
+    description: 'Imágenes del POI',
+    nullable: true
+  })
+  images?: ImageResponse[] | null;
 
   @ApiProperty({ 
     description: 'Fecha de creación en ISO 8601',

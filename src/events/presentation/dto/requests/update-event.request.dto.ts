@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, IsDateString, IsUUID } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsDateString, IsUUID, IsArray, ArrayMaxSize, IsUrl } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateEventRequest {
@@ -37,4 +37,15 @@ export class UpdateEventRequest {
   @IsDateString()
   @IsOptional()
   endDate?: string | null;
+
+  @ApiPropertyOptional({ 
+    description: 'URLs de imágenes del evento (máximo 2). La primera será la imagen principal.',
+    example: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
+    type: [String]
+  })
+  @IsArray()
+  @ArrayMaxSize(2, { message: 'No puede proporcionar más de 2 imágenes' })
+  @IsUrl({}, { each: true, message: 'Cada imagen debe ser una URL válida' })
+  @IsOptional()
+  imageUrls?: string[];
 }

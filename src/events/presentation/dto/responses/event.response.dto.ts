@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EventStatus } from '../../../domain/enums/event-status.enum';
 import { EventCategoryResponse } from './event-category.response.dto';
 import { PointOfInterestResponse } from './point-of-interest.response.dto';
+import { ImageResponse } from '../../../../media/presentation/dto/image.response.dto';
 
 export class EventResponse {
   @ApiProperty({ description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -38,6 +39,9 @@ export class EventResponse {
     nullable: true
   })
   pointsOfInterest?: Omit<PointOfInterestResponse, 'event'>[] | null;
+
+  @ApiProperty({ type: [ImageResponse], description: 'Imágenes del evento' })
+  images!: ImageResponse[];
 
   @ApiProperty({ 
     description: 'Fecha de creación en ISO 8601',

@@ -15,9 +15,13 @@ import { PointsOfInterestRepository } from './domain/repositories/points-of-inte
 import { TypeormEventsRepository } from './infrastructure/persistence/typeorm/typeorm-events.repository';
 import { TypeormEventCategoriesRepository } from './infrastructure/persistence/typeorm/typeorm-event-categories.repository';
 import { TypeormPointsOfInterestRepository } from './infrastructure/persistence/typeorm/typeorm-points-of-interest.repository';
+import { MediaModule } from '../media/media.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EventEntity, EventCategoryEntity, PointOfInterestEntity])],
+  imports: [
+    TypeOrmModule.forFeature([EventEntity, EventCategoryEntity, PointOfInterestEntity]),
+    MediaModule,
+  ],
   controllers: [EventsController, EventCategoriesController, PointsOfInterestController],
   providers: [
     EventsService,
