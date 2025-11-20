@@ -71,6 +71,20 @@ export class EventsService {
     };
   }
 
+  /// Obtiene eventos activos con paginación basada en cursor (sin filtrar por categoría)
+  async findAllWithCursor(
+    pagination: CursorPaginationDto,
+  ): Promise<PaginatedEventsDto> {
+    const limit = pagination.limit ?? 3;
+    const result = await this.eventsRepo.findAllWithCursor(pagination.cursor, limit);
+
+    return {
+      data: result.data,
+      nextCursor: result.nextCursor,
+      hasNextPage: result.hasNextPage,
+    };
+  }
+
   /// Crea un nuevo evento
   async createEvent(dto: CreateEventDto): Promise<EventEntity> {
     // Validaciones de fechas

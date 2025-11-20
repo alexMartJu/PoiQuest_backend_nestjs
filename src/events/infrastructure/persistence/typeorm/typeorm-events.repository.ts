@@ -162,6 +162,45 @@ export class TypeormEventsRepository implements EventsRepository {
     };
   }
 
+  async findAllWithCursor(
+    cursor: string | undefined,
+    limit: number,
+  ): Promise<PaginatedResult> {
+    const queryBuilder = this.eventRepo
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.category', 'category')
+      .where('event.status = :status', { status: EventStatus.ACTIVE })
+      .andWhere('event.deletedAt IS NULL')
+      .orderBy('event.createdAt', 'ASC')
+      .limit(limit + 1);
+
+    if (cursor) {
+      const parsed = new Date(cursor);
+      if (!isNaN(parsed.getTime())) {
+        queryBuilder.andWhere('event.createdAt > :cursor', { cursor: parsed });
+      } else {
+        queryBuilder.andWhere('event.createdAt > :cursor', { cursor });
+      }
+    }
+
+    const events = await queryBuilder.getMany();
+
+    const hasNextPage = events.length > limit;
+    if (hasNextPage) {
+      events.pop();
+    }
+
+    const nextCursor = hasNextPage && events.length > 0
+      ? events[events.length - 1].createdAt.toISOString()
+      : null;
+
+    return {
+      data: events,
+      nextCursor,
+      hasNextPage,
+    };
+  }
+
   async findOneByUuidWithManager(manager: EntityManager, uuid: string): Promise<EventEntity | null> {
     return await manager.getRepository(EventEntity).findOne({
       where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },

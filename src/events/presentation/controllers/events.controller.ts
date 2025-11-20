@@ -66,23 +66,25 @@ export class EventsController {
     };
   }
 
-  @ApiOperation({ summary: 'Lista de todos los eventos activos' })
-  @ApiOkResponse({ type: EventResponse, isArray: true, description: 'Lista de eventos activos' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @ApiBearerAuth()
-  @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
-  @ApiForbiddenResponse({ type: ErrorResponse, description: 'Acceso denegado: se requiere rol admin' })
+  @ApiOperation({ summary: 'Lista de todos los eventos activos (paginación por cursor)' })
+  @ApiOkResponse({ type: PaginatedEventsResponse, description: 'Lista paginada de eventos activos' })
+  @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor ISO 8601 para paginación (createdAt). Usar el valor devuelto en nextCursor para continuar.', example: '2025-03-09T12:34:56.000Z' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de items por página. Default 3', example: 3 })
+  @Public()
   @Get()
-  async getEvents(): Promise<EventResponse[]> {
-    const entities = await this.eventsService.findAll();
-    
+  async getEvents(@Query() pagination: CursorPaginationRequest): Promise<PaginatedEventsResponse> {
+    const result = await this.eventsService.findAllWithCursor(pagination);
+
     // Cargar imágenes para todos los eventos en una sola consulta (evita N+1)
-    const eventIds = entities.map(e => e.id);
+    const eventIds = result.data.map(e => e.id);
     const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
     const imagesMap = buildImagesMap(allImages);
-    
-    return EventMapper.toResponseList(entities, false, imagesMap);
+
+    return {
+      data: EventMapper.toResponseList(result.data, false, imagesMap),
+      nextCursor: result.nextCursor,
+      hasNextPage: result.hasNextPage,
+    };
   }
 
   @ApiOperation({ summary: 'Lista de eventos finalizados' })

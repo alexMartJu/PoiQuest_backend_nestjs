@@ -32,6 +32,12 @@ export abstract class EventsRepository {
     cursor: string | undefined, 
     limit: number
   ): Promise<PaginatedResult>;
+
+  /** Obtiene eventos activos con paginación basada en cursor (sin filtrar por categoría). */
+  abstract findAllWithCursor(
+    cursor: string | undefined,
+    limit: number,
+  ): Promise<PaginatedResult>;
   
   /** Devuelve true si existe al menos un evento no eliminado asociado a la categoría */
   abstract existsByCategoryId(categoryId: number): Promise<boolean>;

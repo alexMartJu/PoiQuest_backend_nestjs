@@ -1,7 +1,7 @@
 export default [
   {
     email: 'admin@poiquest.com',
-    password: 'temporal123',
+    password: 'Temporal1234',
     role: 'admin',
     profile: {
       name: 'Admin',
@@ -12,7 +12,7 @@ export default [
   },
   {
     email: 'user1@poiquest.com',
-    password: 'temporal123',
+    password: 'Temporal1234',
     role: 'user',
     profile: {
       name: 'User',
