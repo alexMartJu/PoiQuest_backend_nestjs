@@ -14,7 +14,7 @@ export class UpdateProfileRequest {
   @IsOptional()
   lastname?: string;
 
-  @ApiPropertyOptional({ description: 'Biografía del usuario', nullable: true })
+  @ApiPropertyOptional({ description: 'Biografía del usuario', nullable: true, example: null, type: String })
   @IsString()
   @IsOptional()
   bio?: string | null;

@@ -8,7 +8,7 @@ export class UpdateEventRequest {
   @IsOptional()
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Descripción del evento', nullable: true })
+  @ApiPropertyOptional({ description: 'Descripción del evento', nullable: true, example: null, type: String })
   @IsString()
   @IsOptional()
   description?: string | null;
@@ -18,7 +18,7 @@ export class UpdateEventRequest {
   @IsOptional()
   categoryUuid?: string;
 
-  @ApiPropertyOptional({ maxLength: 255, description: 'Ubicación del evento', nullable: true })
+  @ApiPropertyOptional({ maxLength: 255, description: 'Ubicación del evento', nullable: true, example: null, type: String })
   @IsString()
   @MaxLength(255)
   @IsOptional()

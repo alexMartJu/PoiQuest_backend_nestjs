@@ -7,7 +7,7 @@ export class CreateEventCategoryRequest {
   @MaxLength(150)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Descripción de la categoría' })
+  @ApiPropertyOptional({ description: 'Descripción de la categoría', example: null, nullable: true, type: String })
   @IsString()
   @IsOptional()
   description?: string | null;

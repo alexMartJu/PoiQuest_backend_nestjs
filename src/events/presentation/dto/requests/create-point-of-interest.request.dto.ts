@@ -11,18 +11,18 @@ export class CreatePointOfInterestRequest {
   @MaxLength(255)
   title!: string;
 
-  @ApiPropertyOptional({ maxLength: 255, description: 'Autor del POI', nullable: true })
+  @ApiPropertyOptional({ maxLength: 255, description: 'Autor del POI', nullable: true, example: null, type: String })
   @IsString()
   @MaxLength(255)
   @IsOptional()
   author?: string | null;
 
-  @ApiPropertyOptional({ description: 'Descripción del POI', nullable: true })
+  @ApiPropertyOptional({ description: 'Descripción del POI', nullable: true, example: null, type: String })
   @IsString()
   @IsOptional()
   description?: string | null;
 
-  @ApiPropertyOptional({ description: 'Contenido multimedia en formato JSON', nullable: true })
+  @ApiPropertyOptional({ description: 'Contenido multimedia en formato JSON', nullable: true, example: null, type: Object })
   @IsObject()
   @IsOptional()
   multimedia?: Record<string, any> | null;
@@ -32,18 +32,18 @@ export class CreatePointOfInterestRequest {
   @MaxLength(255)
   qrCode!: string;
 
-  @ApiPropertyOptional({ maxLength: 255, description: 'Tag NFC del POI', nullable: true })
+  @ApiPropertyOptional({ maxLength: 255, description: 'Tag NFC del POI', nullable: true, example: null, type: String })
   @IsString()
   @MaxLength(255)
   @IsOptional()
   nfcTag?: string | null;
 
-  @ApiPropertyOptional({ description: 'Coordenada X del POI', nullable: true })
+  @ApiPropertyOptional({ description: 'Coordenada X del POI', nullable: true, example: null, type: Number })
   @IsNumber()
   @IsOptional()
   coordX?: number | null;
 
-  @ApiPropertyOptional({ description: 'Coordenada Y del POI', nullable: true })
+  @ApiPropertyOptional({ description: 'Coordenada Y del POI', nullable: true, example: null, type: Number })
   @IsNumber()
   @IsOptional()
   coordY?: number | null;

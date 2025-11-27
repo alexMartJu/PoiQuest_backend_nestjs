@@ -7,7 +7,7 @@ export class CreateEventRequest {
   @MaxLength(150)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Descripción del evento' })
+  @ApiPropertyOptional({ description: 'Descripción del evento', example: null, nullable: true, type: String })
   @IsString()
   @IsOptional()
   description?: string | null;
@@ -16,7 +16,7 @@ export class CreateEventRequest {
   @IsUUID()
   categoryUuid!: string;
 
-  @ApiPropertyOptional({ maxLength: 255, description: 'Ubicación del evento' })
+  @ApiPropertyOptional({ maxLength: 255, description: 'Ubicación del evento', example: null, nullable: true, type: String })
   @IsString()
   @MaxLength(255)
   @IsOptional()
