@@ -9,9 +9,9 @@ export default [
     location: 'Madrid, España',
     startDate: '2025-01-15',
     endDate: '2025-12-31',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1648309665249-896e1a8163d7?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1550897621-1deef9bdeb0e?auto=format&fit=crop&w=600&q=80'
+    imageFiles: [
+      'event1.jpg',
+      'event1_1.jpg'
     ]
   },
   {
@@ -22,9 +22,8 @@ export default [
     location: 'Parque del Retiro, Madrid',
     startDate: '2025-07-20',
     endDate: '2025-07-22',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1692707483537-8f5e57e71531?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1632652304944-440624f680e9?auto=format&fit=crop&w=600&q=80'
+    imageFiles: [
+      'event2.jpg'
     ]
   },
   {
@@ -35,9 +34,8 @@ export default [
     location: 'Teatro Real, Madrid',
     startDate: '2025-03-10',
     endDate: '2025-04-15',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1683295550245-e957a39d2e67?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1582152492025-4d3dba658fc7?auto=format&fit=crop&w=600&q=80'
+    imageFiles: [
+      'event3.jpg'
     ]
   },
   {
@@ -48,9 +46,8 @@ export default [
     location: 'Centro histórico de Madrid',
     startDate: '2025-02-01',
     endDate: '2025-11-30',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1714849702561-005bbaa816ff?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1704133931035-65772e746917?auto=format&fit=crop&w=600&q=80'
+    imageFiles: [
+      'event4.jpg'
     ]
   },
   {
@@ -61,9 +58,8 @@ export default [
     location: 'IFEMA, Madrid',
     startDate: '2025-05-10',
     endDate: '2025-05-14',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1573757056004-065ad36e2cf4?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1554475901-4538ddfbccc2?auto=format&fit=crop&w=600&q=80'
+    imageFiles: [
+      'event5.jpg'
     ]
   },
   {
@@ -74,9 +70,8 @@ export default [
     location: 'IFEMA, Madrid',
     startDate: '2025-05-10',
     endDate: '2025-05-14',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1756147782837-67a523b75330?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1664911200744-8c3a496baa2a?auto=format&fit=crop&w=600&q=80'
+    imageFiles: [
+      'event6.jpg'
     ]
   },
 ];

@@ -5,6 +5,9 @@ import { EventEntity } from '../../../events/domain/entities/event.entity';
 import { ImageEntity } from '../../../media/domain/entities/image.entity';
 import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
 import poisData from '../../../data/points-of-interest';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as Minio from 'minio';
 
 export class PointOfInterestSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<void> {
@@ -39,18 +42,55 @@ export class PointOfInterestSeeder implements Seeder {
         
         const savedPoi = await manager.save(PointOfInterestEntity, poi);
 
-        // Crear imágenes si existen
-        if (poiData.imageUrls && poiData.imageUrls.length > 0) {
-          const images = poiData.imageUrls.map((url, imageIdx) => 
-            imageRepo.create({
-              imageUrl: url,
+        // Crear imágenes si existen (subir locales a MinIO y guardar metadata)
+        if (poiData.imageFiles && poiData.imageFiles.length > 0) {
+          const assetsDir = path.resolve(__dirname, '../../assets/images');
+
+          const minioClient = new Minio.Client({
+            endPoint: process.env.MINIO_ENDPOINT || 'minio',
+            port: parseInt(process.env.MINIO_PORT || '9000'),
+            useSSL: process.env.MINIO_USE_SSL === 'true',
+            accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
+            secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+          });
+
+          const bucket = process.env.MINIO_IMAGES_BUCKET || 'images';
+
+          const imagesToSave: ImageEntity[] = [];
+          for (let i = 0; i < poiData.imageFiles.length; i++) {
+            const fileName = poiData.imageFiles[i];
+            const localPath = path.join(assetsDir, fileName);
+            if (!fs.existsSync(localPath)) {
+              console.warn(`Local asset not found: ${localPath} — skipping`);
+              continue;
+            }
+
+            const objectName = `pois/${savedPoi.id}/${Date.now()}_${fileName}`;
+
+            try {
+              await new Promise<void>((res, rej) =>
+                (minioClient as any).fPutObject(bucket, objectName, localPath, {}, (err: Error | null) => (err ? rej(err) : res())),
+              );
+            } catch (err) {
+              console.error(`Error uploading ${localPath} to MinIO:`, err);
+              continue;
+            }
+
+            const img = imageRepo.create({
+              fileName: objectName,
+              bucket,
               imageableType: ImageableType.POI,
               imageableId: savedPoi.id,
-              sortOrder: imageIdx + 1,
-              isPrimary: imageIdx === 0,
-            })
-          );
-          await manager.save(ImageEntity, images);
+              sortOrder: i + 1,
+              isPrimary: i === 0,
+            } as unknown as ImageEntity);
+
+            imagesToSave.push(img);
+          }
+
+          if (imagesToSave.length > 0) {
+            await imageRepo.save(imagesToSave);
+          }
         }
       }
     });
