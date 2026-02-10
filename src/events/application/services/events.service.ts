@@ -111,10 +111,16 @@ export class EventsService {
       const saved = await manager.save(event);
 
       // Adjuntar imágenes (usar el mismo EntityManager para mantener atomicidad)
+      // Convertir los nombres de archivo a formato de imágenes con bucket
+      const images = dto.imageFileNames.map(fileName => ({
+        fileName,
+        bucket: 'images', // Bucket de imágenes en MinIO
+      }));
+
       await this.imagesService.attachImages({
         imageableType: ImageableType.EVENT,
         imageableId: saved.id,
-        imageUrls: dto.imageUrls,
+        images,
       }, manager);
 
       // Reconsultar usando el EntityManager para que la entidad recién guardada
@@ -171,11 +177,17 @@ export class EventsService {
       const saved = await manager.save(event);
 
       // Actualizar imágenes si se proporcionan
-      if (dto.imageUrls !== undefined) {
+      if (dto.imageFileNames !== undefined) {
+        // Convertir los nombres de archivo a formato de imágenes con bucket
+        const images = dto.imageFileNames.map(fileName => ({
+          fileName,
+          bucket: 'images', // Bucket de imágenes en MinIO
+        }));
+
         await this.imagesService.updateImages({
           imageableType: ImageableType.EVENT,
           imageableId: saved.id,
-          imageUrls: dto.imageUrls,
+          images,
         }, manager);
       }
 

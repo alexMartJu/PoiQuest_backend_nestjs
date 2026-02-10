@@ -16,11 +16,13 @@ import { TypeormEventsRepository } from './infrastructure/persistence/typeorm/ty
 import { TypeormEventCategoriesRepository } from './infrastructure/persistence/typeorm/typeorm-event-categories.repository';
 import { TypeormPointsOfInterestRepository } from './infrastructure/persistence/typeorm/typeorm-points-of-interest.repository';
 import { MediaModule } from '../media/media.module';
+import { MinioClientModule } from '../minio-client/minio-client.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([EventEntity, EventCategoryEntity, PointOfInterestEntity]),
     MediaModule,
+    MinioClientModule,
   ],
   controllers: [EventsController, EventCategoriesController, PointsOfInterestController],
   providers: [

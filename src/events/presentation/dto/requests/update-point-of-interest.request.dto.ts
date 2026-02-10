@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, IsNumber, IsObject, IsArray, ArrayMaxSize, IsUrl } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsNumber, IsObject, IsArray, ArrayMaxSize } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdatePointOfInterestRequest {
@@ -47,13 +47,13 @@ export class UpdatePointOfInterestRequest {
   coordY?: number | null;
 
   @ApiPropertyOptional({ 
-    description: 'URLs de imágenes del POI (máximo 2). La primera será la imagen principal.',
-    example: ['https://example.com/poi-image1.jpg'],
+    description: 'Nombres de archivos de imágenes del POI almacenadas en MinIO (máximo 2). La primera será la imagen principal.',
+    example: ['1738996800000-poi-photo1.jpg'],
     type: [String]
   })
   @IsArray()
   @ArrayMaxSize(2, { message: 'No puede proporcionar más de 2 imágenes' })
-  @IsUrl({}, { each: true, message: 'Cada imagen debe ser una URL válida' })
+  @IsString({ each: true, message: 'Cada nombre de archivo debe ser una cadena válida' })
   @IsOptional()
-  imageUrls?: string[];
+  imageFileNames?: string[];
 }

@@ -13,8 +13,10 @@ import { UpdatePointOfInterestRequest } from '../dto/requests/update-point-of-in
 import { PointOfInterestResponse } from '../dto/responses/point-of-interest.response.dto';
 import { PointOfInterestMapper } from '../mappers/point-of-interest.mapper';
 import { ImagesService } from '../../../media/application/services/images.service';
+import { FilesService } from '../../../media/application/services/files.service';
 import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
 import { buildImagesMap } from '../helpers/images-map.helper';
+import { PresignedUrlHelper } from '../helpers/presigned-url.helper';
 import { ErrorResponse } from '../../../shared/dto/error.response.dto';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -29,6 +31,7 @@ export class PointsOfInterestController {
   constructor(
     private readonly poisService: PointsOfInterestService,
     private readonly imagesService: ImagesService,
+    private readonly filesService: FilesService,
   ) {}
 
   @ApiOperation({ summary: 'Lista de todos los POIs (admin)' })
@@ -44,8 +47,9 @@ export class PointsOfInterestController {
     const poiIds = entities.map(p => p.id);
     const allImages = await this.imagesService.fetchImagesByIds(ImageableType.POI, poiIds);
     const imagesMap = buildImagesMap(allImages);
-    
-    return PointOfInterestMapper.toResponseList(entities, imagesMap);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
+
+    return PointOfInterestMapper.toResponseList(entities, imagesMap, presignedMap);
   }
 
   @ApiOperation({ summary: 'Detalle de un POI por uuid (público)' })
@@ -58,7 +62,8 @@ export class PointsOfInterestController {
   async getPoi(@Param('uuid') uuid: string): Promise<PointOfInterestResponse> {
     const entity = await this.poisService.findOneByUuid(uuid);
     const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
-    return PointOfInterestMapper.toResponse(entity, images);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return PointOfInterestMapper.toResponse(entity, images, presignedMap);
   }
 
   @ApiOperation({ summary: 'Crear un nuevo POI (admin)' })

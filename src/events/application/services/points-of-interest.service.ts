@@ -66,10 +66,16 @@ export class PointsOfInterestService {
       const saved = await manager.save(poi);
 
       // Adjuntar imágenes (usar manager para atomicidad)
+      // Convertir los nombres de archivo a formato de imágenes con bucket
+      const images = dto.imageFileNames.map(fileName => ({
+        fileName,
+        bucket: 'images', // Bucket de imágenes en MinIO
+      }));
+
       await this.imagesService.attachImages({
         imageableType: ImageableType.POI,
         imageableId: saved.id,
-        imageUrls: dto.imageUrls,
+        images,
       }, manager);
 
       return saved;
@@ -100,11 +106,17 @@ export class PointsOfInterestService {
       const saved = await manager.save(poi);
 
       // Actualizar imágenes si se proporcionan
-      if (dto.imageUrls !== undefined) {
+      if (dto.imageFileNames !== undefined) {
+        // Convertir los nombres de archivo a formato de imágenes con bucket
+        const images = dto.imageFileNames.map(fileName => ({
+          fileName,
+          bucket: 'images', // Bucket de imágenes en MinIO
+        }));
+
         await this.imagesService.updateImages({
           imageableType: ImageableType.POI,
           imageableId: saved.id,
-          imageUrls: dto.imageUrls,
+          images,
         }, manager);
       }
 

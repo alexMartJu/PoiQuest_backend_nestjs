@@ -10,8 +10,10 @@ import { EventResponse } from '../dto/responses/event.response.dto';
 import { PaginatedEventsResponse } from '../dto/responses/paginated-events.response.dto';
 import { EventMapper } from '../mappers/event.mapper';
 import { ImagesService } from '../../../media/application/services/images.service';
+import { FilesService } from '../../../media/application/services/files.service';
 import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
 import { buildImagesMap } from '../helpers/images-map.helper';
+import { PresignedUrlHelper } from '../helpers/presigned-url.helper';
 import { 
   ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse, 
   ApiNotFoundResponse, ApiBadRequestResponse, ApiConflictResponse, ApiBody, ApiParam, ApiQuery,
@@ -29,6 +31,7 @@ export class EventsController {
   constructor(
     private readonly eventsService: EventsService,
     private readonly imagesService: ImagesService,
+    private readonly filesService: FilesService,
   ) {}
 
   @ApiOperation({ 
@@ -58,9 +61,10 @@ export class EventsController {
     const eventIds = result.data.map(e => e.id);
     const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
     const imagesMap = buildImagesMap(allImages);
-    
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
+
     return {
-      data: EventMapper.toResponseList(result.data, false, imagesMap),
+      data: EventMapper.toResponseList(result.data, false, imagesMap, presignedMap),
       nextCursor: result.nextCursor,
       hasNextPage: result.hasNextPage,
     };
@@ -79,9 +83,10 @@ export class EventsController {
     const eventIds = result.data.map(e => e.id);
     const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
     const imagesMap = buildImagesMap(allImages);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
 
     return {
-      data: EventMapper.toResponseList(result.data, false, imagesMap),
+      data: EventMapper.toResponseList(result.data, false, imagesMap, presignedMap),
       nextCursor: result.nextCursor,
       hasNextPage: result.hasNextPage,
     };
@@ -101,7 +106,8 @@ export class EventsController {
     const eventIds = entities.map(e => e.id);
     const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
     const imagesMap = buildImagesMap(allImages);
-    return EventMapper.toResponseList(entities, false, imagesMap);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
+    return EventMapper.toResponseList(entities, false, imagesMap, presignedMap);
   }
 
   @ApiOperation({ summary: 'Detalle de un evento activo por uuid (incluye POIs)' })
@@ -113,7 +119,8 @@ export class EventsController {
   async getEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
     const entity = await this.eventsService.findOneByUuid(uuid);
     const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
-    return EventMapper.toResponse(entity, true, images); // true para incluir POIs
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return EventMapper.toResponse(entity, true, images, presignedMap); // true para incluir POIs
   }
 
   @ApiOperation({ summary: 'Detalle de un evento finalizado por uuid' })
@@ -129,7 +136,8 @@ export class EventsController {
   async getFinishedEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
     const entity = await this.eventsService.findFinishedByUuid(uuid);
     const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
-    return EventMapper.toResponse(entity, false, images);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return EventMapper.toResponse(entity, false, images, presignedMap);
   }
 
   @ApiOperation({ summary: 'Crear un nuevo evento' })
@@ -147,7 +155,8 @@ export class EventsController {
   async createEvent(@Body() dto: CreateEventRequest): Promise<EventResponse> {
     const entity = await this.eventsService.createEvent(dto);
     const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
-    return EventMapper.toResponse(entity, false, images);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return EventMapper.toResponse(entity, false, images, presignedMap);
   }
 
   @ApiOperation({ summary: 'Actualizar un evento por uuid' })
@@ -168,7 +177,8 @@ export class EventsController {
   ): Promise<EventResponse> {
     const entity = await this.eventsService.updateByUuid(uuid, dto);
     const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
-    return EventMapper.toResponse(entity, false, images);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return EventMapper.toResponse(entity, false, images, presignedMap);
   }
 
   @ApiOperation({ summary: 'Eliminar un evento por uuid (soft delete)' })

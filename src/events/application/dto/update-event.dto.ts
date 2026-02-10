@@ -5,5 +5,5 @@ export interface UpdateEventDto {
   location?: string | null;
   startDate?: string; // formato: YYYY-MM-DD
   endDate?: string | null; // formato: YYYY-MM-DD
-  imageUrls?: string[]; // Máximo 2
+  imageFileNames?: string[]; // Máximo 2 - nombres de archivos en MinIO bucket 'images'
 }
