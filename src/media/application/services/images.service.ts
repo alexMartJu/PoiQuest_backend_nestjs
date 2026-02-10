@@ -15,16 +15,17 @@ export class ImagesService {
 
   /**
    * Adjunta imágenes a una entidad (event/poi).
-   * La primera URL será marcada como primaria.
+   * La primera imagen será marcada como primaria.
    * Se espera que esta función se llame dentro de una transacción.
    */
   async attachImages(dto: AttachImagesDto, manager?: EntityManager): Promise<ImageEntity[]> {
-    if (!dto.imageUrls || dto.imageUrls.length === 0) {
+    if (!dto.images || dto.images.length === 0) {
       return [];
     }
-    const images = dto.imageUrls.map((url, index) =>
+    const images = dto.images.map((imageInfo, index) =>
       this.imagesRepo.create({
-        imageUrl: url,
+        fileName: imageInfo.fileName,
+        bucket: imageInfo.bucket,
         imageableType: dto.imageableType,
         imageableId: dto.imageableId,
         sortOrder: index,
@@ -43,7 +44,7 @@ export class ImagesService {
   /**
    * Actualiza imágenes mediante reconciliación optimizada:
    * - Elimina las imágenes existentes que no están en la nueva lista (en bloque)
-   * - Mantiene las que ya existen (misma URL)
+   * - Mantiene las que ya existen (mismo fileName y bucket)
    * - Agrega las nuevas (en bloque)
    * Se espera que esta función se llame dentro de una transacción.
    */
@@ -55,12 +56,13 @@ export class ImagesService {
       ? await repo!.find({ where: { imageableType: dto.imageableType, imageableId: dto.imageableId } })
       : await this.imagesRepo.findByImageable(dto.imageableType, dto.imageableId);
 
-    const existingUrls = existingImages.map(img => img.imageUrl);
-    const newUrls = dto.imageUrls || [];
+    const existingKeys = existingImages.map(img => `${img.bucket}/${img.fileName}`);
+    const newImages = dto.images || [];
+    const newKeys = newImages.map(img => `${img.bucket}/${img.fileName}`);
 
     // Calcular IDs a eliminar
     const toDeleteIds = existingImages
-      .filter(img => !newUrls.includes(img.imageUrl))
+      .filter(img => !newKeys.includes(`${img.bucket}/${img.fileName}`))
       .map(img => img.id);
 
     if (toDeleteIds.length > 0) {
@@ -71,13 +73,14 @@ export class ImagesService {
       }
     }
 
-    // Identificar URLs a crear
-    const toCreate = newUrls.filter(url => !existingUrls.includes(url));
+    // Identificar imágenes a crear
+    const toCreate = newImages.filter(img => !existingKeys.includes(`${img.bucket}/${img.fileName}`));
 
     if (toCreate.length > 0) {
-      const newImages = toCreate.map((url) =>
+      const imagesToSave = toCreate.map((imageInfo) =>
         this.imagesRepo.create({
-          imageUrl: url,
+          fileName: imageInfo.fileName,
+          bucket: imageInfo.bucket,
           imageableType: dto.imageableType,
           imageableId: dto.imageableId,
           sortOrder: 0,
@@ -86,9 +89,9 @@ export class ImagesService {
       );
 
       if (manager) {
-        await repo!.save(newImages);
+        await repo!.save(imagesToSave);
       } else {
-        await this.imagesRepo.saveMany(newImages);
+        await this.imagesRepo.saveMany(imagesToSave);
       }
     }
 
@@ -98,7 +101,7 @@ export class ImagesService {
       : await this.imagesRepo.findByImageable(dto.imageableType, dto.imageableId);
 
     allImages.forEach(img => {
-      const newIndex = newUrls.indexOf(img.imageUrl);
+      const newIndex = newKeys.indexOf(`${img.bucket}/${img.fileName}`);
       if (newIndex !== -1) {
         img.sortOrder = newIndex;
         img.isPrimary = newIndex === 0;

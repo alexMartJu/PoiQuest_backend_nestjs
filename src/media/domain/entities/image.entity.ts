@@ -15,8 +15,11 @@ export class ImageEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ name: 'image_url', type: 'varchar', length: 255 })
-  imageUrl!: string;
+  @Column({ name: 'file_name', type: 'varchar', length: 255 })
+  fileName!: string;
+
+  @Column({ name: 'bucket', type: 'varchar', length: 100 })
+  bucket!: string;
 
   @Column({ name: 'imageable_type', type: 'enum', enum: ImageableType })
   imageableType!: ImageableType;
