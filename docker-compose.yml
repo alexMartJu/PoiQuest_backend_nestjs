@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     depends_on:
       - database
+      - minio
     environment:
       - TZ=Europe/Madrid
       - DB_HOST=${DB_HOST}
@@ -13,6 +14,11 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
       - NODE_ENV=${NODE_ENV}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_USE_SSL=${MINIO_USE_SSL}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
     ports:
       - ${WEB_SERVER_PORT}:3000
     working_dir: /web
@@ -56,8 +62,26 @@ services:
     networks:
       - poiquest-network
 
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: poiquest-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - poiquest-network
+
 volumes:
   mariadb_data:
+    driver: local
+  minio_data:
     driver: local
 
 networks:
