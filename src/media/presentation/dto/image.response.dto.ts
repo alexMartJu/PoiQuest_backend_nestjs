@@ -4,8 +4,14 @@ export class ImageResponse {
   @ApiProperty({ description: 'ID de la imagen' })
   id!: number;
 
-  @ApiProperty({ description: 'URL de la imagen' })
-  imageUrl!: string;
+  @ApiProperty({ description: 'Nombre del archivo en MinIO' })
+  fileName!: string;
+
+  @ApiProperty({ description: 'Bucket de MinIO donde está almacenado' })
+  bucket!: string;
+
+  @ApiProperty({ description: 'URL presigned para acceder al archivo (válida por 24 horas)' })
+  url!: string;
 
   @ApiProperty({ description: 'Orden de visualización' })
   sortOrder!: number;
