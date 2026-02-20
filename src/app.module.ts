@@ -28,6 +28,7 @@ import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ProfileModule } from './profile/profile.module';
     UsersModule,
     EventsModule,
     ProfileModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
