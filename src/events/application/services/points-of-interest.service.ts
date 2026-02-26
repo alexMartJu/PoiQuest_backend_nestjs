@@ -141,4 +141,13 @@ export class PointsOfInterestService {
   async findByEventId(eventId: number): Promise<PointOfInterestEntity[]> {
     return await this.poisRepo.findByEventId(eventId);
   }
+
+  /// Obtiene POIs por uuid del evento
+  async findByEventUuid(eventUuid: string): Promise<PointOfInterestEntity[]> {
+    const event = await this.eventsRepo.findOneByUuid(eventUuid);
+    if (!event) {
+      throw new NotFoundError(`Evento con UUID ${eventUuid} no encontrado`);
+    }
+    return await this.poisRepo.findByEventId(event.id);
+  }
 }

@@ -34,6 +34,24 @@ export class PointsOfInterestController {
     private readonly filesService: FilesService,
   ) {}
 
+  @ApiOperation({ summary: 'Lista de POIs de un evento por uuid (público)' })
+  @ApiParam({ name: 'eventUuid', description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiOkResponse({ type: PointOfInterestResponse, isArray: true, description: 'Lista de POIs del evento' })
+  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
+  @Public()
+  @Get('event/:eventUuid')
+  async getPoisByEvent(@Param('eventUuid') eventUuid: string): Promise<PointOfInterestResponse[]> {
+    const entities = await this.poisService.findByEventUuid(eventUuid);
+
+    // Cargar imágenes para todos los POIs en una sola consulta (evita N+1)
+    const poiIds = entities.map(p => p.id);
+    const allImages = await this.imagesService.fetchImagesByIds(ImageableType.POI, poiIds);
+    const imagesMap = buildImagesMap(allImages);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
+
+    return PointOfInterestMapper.toResponseList(entities, imagesMap, presignedMap);
+  }
+
   @ApiOperation({ summary: 'Lista de todos los POIs (admin)' })
   @ApiOkResponse({ type: PointOfInterestResponse, isArray: true, description: 'Lista de POIs' })
   @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
