@@ -12,8 +12,10 @@ import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.ent
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './events/domain/entities/point-of-interest.entity';
-import { TimeSlotEntity } from './entities/time-slot.entity';
 import { TicketEntity } from './entities/ticket.entity';
+import { CityEntity } from './partners/domain/entities/city.entity';
+import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
+import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
 import { PaymentEntity } from './entities/payment.entity';
 import { ScanEntity } from './entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
@@ -29,6 +31,7 @@ import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { PartnersModule } from './partners/partners.module';
 
 @Module({
   imports: [
@@ -50,9 +53,11 @@ import { AnalyticsModule } from './analytics/analytics.module';
           RoleEntity,
           BlacklistTokenEntity,
           EventCategoryEntity,
+          CityEntity,
+          OrganizerEntity,
+          SponsorEntity,
           EventEntity,
           PointOfInterestEntity,
-          TimeSlotEntity,
           TicketEntity,
           PaymentEntity,
           ScanEntity,
@@ -72,6 +77,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     EventsModule,
     ProfileModule,
     AnalyticsModule,
+    PartnersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
