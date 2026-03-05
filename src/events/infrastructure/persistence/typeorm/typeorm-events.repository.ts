@@ -22,21 +22,21 @@ export class TypeormEventsRepository implements EventsRepository {
         status: EventStatus.ACTIVE,
         deletedAt: IsNull() 
       },
-      relations: ['category'],
+      relations: ['category', 'city', 'organizer', 'sponsor'],
     });
   }
 
   async findOneById(id: number): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
       where: { id, deletedAt: IsNull() },
-      relations: ['category'],
+      relations: ['category', 'city', 'organizer', 'sponsor'],
     });
   }
 
   async findOneByUuid(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
       where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
-      relations: ['category', 'pointsOfInterest'],
+      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
     });
   }
 
@@ -46,15 +46,16 @@ export class TypeormEventsRepository implements EventsRepository {
     return await this.eventRepo.findOne({
       where: { uuid },
       withDeleted: true,
-      relations: ['category'],
+      relations: ['category', 'city', 'organizer', 'sponsor'],
     });
   }
 
   async findAllFinished(): Promise<EventEntity[]> {
-    // Usar QueryBuilder para asegurar que la relación `category` se cargue
-    // incluso si la categoría está soft-deleted.
     return await this.eventRepo.createQueryBuilder('event')
       .leftJoinAndSelect('event.category', 'category')
+      .leftJoinAndSelect('event.city', 'city')
+      .leftJoinAndSelect('event.organizer', 'organizer')
+      .leftJoinAndSelect('event.sponsor', 'sponsor')
       .where('event.status = :status', { status: EventStatus.FINISHED })
       .andWhere('event.deletedAt IS NULL')
       .orderBy('event.createdAt', 'ASC')
@@ -64,6 +65,9 @@ export class TypeormEventsRepository implements EventsRepository {
   async findFinishedByUuid(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.createQueryBuilder('event')
       .leftJoinAndSelect('event.category', 'category')
+      .leftJoinAndSelect('event.city', 'city')
+      .leftJoinAndSelect('event.organizer', 'organizer')
+      .leftJoinAndSelect('event.sponsor', 'sponsor')
       .where('event.uuid = :uuid', { uuid })
       .andWhere('event.status = :status', { status: EventStatus.FINISHED })
       .andWhere('event.deletedAt IS NULL')
@@ -119,6 +123,9 @@ export class TypeormEventsRepository implements EventsRepository {
     const queryBuilder = this.eventRepo
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.category', 'category')
+      .leftJoinAndSelect('event.city', 'city')
+      .leftJoinAndSelect('event.organizer', 'organizer')
+      .leftJoinAndSelect('event.sponsor', 'sponsor')
       .where('category.uuid = :categoryUuid', { categoryUuid })
       .andWhere('event.status = :status', { status: EventStatus.ACTIVE })
       .andWhere('event.deletedAt IS NULL')
@@ -169,6 +176,9 @@ export class TypeormEventsRepository implements EventsRepository {
     const queryBuilder = this.eventRepo
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.category', 'category')
+      .leftJoinAndSelect('event.city', 'city')
+      .leftJoinAndSelect('event.organizer', 'organizer')
+      .leftJoinAndSelect('event.sponsor', 'sponsor')
       .where('event.status = :status', { status: EventStatus.ACTIVE })
       .andWhere('event.deletedAt IS NULL')
       .orderBy('event.createdAt', 'ASC')
@@ -204,7 +214,7 @@ export class TypeormEventsRepository implements EventsRepository {
   async findOneByUuidWithManager(manager: EntityManager, uuid: string): Promise<EventEntity | null> {
     return await manager.getRepository(EventEntity).findOne({
       where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
-      relations: ['category', 'pointsOfInterest'],
+      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
     });
   }
 }

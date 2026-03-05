@@ -3,6 +3,9 @@ import { EventStatus } from '../../../domain/enums/event-status.enum';
 import { EventCategoryResponse } from './event-category.response.dto';
 import { PointOfInterestResponse } from './point-of-interest.response.dto';
 import { ImageResponse } from '../../../../media/presentation/dto/image.response.dto';
+import { CityResponse } from '../../../../partners/presentation/dto/responses/city.response.dto';
+import { OrganizerResponse } from '../../../../partners/presentation/dto/responses/organizer.response.dto';
+import { SponsorResponse } from '../../../../partners/presentation/dto/responses/sponsor.response.dto';
 
 export class EventResponse {
   @ApiProperty({ description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -20,8 +23,23 @@ export class EventResponse {
   @ApiProperty({ enum: EventStatus, description: 'Estado del evento (active/finished)' })
   status!: EventStatus;
 
-  @ApiPropertyOptional({ description: 'Ubicación del evento', nullable: true })
-  location!: string | null;
+  @ApiPropertyOptional({ type: CityResponse, description: 'Ciudad donde se celebra el evento', nullable: true })
+  city!: CityResponse | null;
+
+  @ApiPropertyOptional({ type: OrganizerResponse, description: 'Organizador del evento', nullable: true })
+  organizer!: OrganizerResponse | null;
+
+  @ApiPropertyOptional({ type: SponsorResponse, description: 'Patrocinador del evento', nullable: true })
+  sponsor!: SponsorResponse | null;
+
+  @ApiProperty({ description: 'Indica si el evento es premium (requiere pago)', example: false })
+  isPremium!: boolean;
+
+  @ApiPropertyOptional({ description: 'Precio del evento en EUR (solo si isPremium = true)', nullable: true, type: Number, example: null })
+  price!: number | null;
+
+  @ApiPropertyOptional({ description: 'Capacidad máxima de personas por día. null = sin límite.', nullable: true, type: Number, example: null })
+  capacityPerDay!: number | null;
 
   @ApiProperty({ description: 'Fecha de inicio (YYYY-MM-DD)', example: '2025-12-01' })
   startDate!: string;
