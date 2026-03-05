@@ -1,11 +1,10 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn,
-  UpdateDateColumn, BeforeInsert, Index, OneToMany
+  UpdateDateColumn, BeforeInsert, Index, OneToMany,
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { ProfileEntity } from '../profile/domain/entities/profile.entity';
 import { EventEntity } from '../events/domain/entities/event.entity';
-import { TimeSlotEntity } from './time-slot.entity';
 import { PaymentEntity } from './payment.entity';
 
 export enum TicketStatus {
@@ -18,7 +17,7 @@ export enum TicketStatus {
 @Entity({ name: 'ticket' })
 @Index('idx_ticket_profile', ['profileId'])
 @Index('idx_ticket_event', ['eventId'])
-@Index('idx_ticket_time_slot', ['timeSlotId'])
+@Index('idx_ticket_event_visit_date', ['eventId', 'visitDate'])
 export class TicketEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -44,13 +43,6 @@ export class TicketEntity {
   @ManyToOne(() => EventEntity, (e) => e.tickets, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'event_id' })
   event!: EventEntity;
-
-  @Column({ name: 'time_slot_id', type: 'int', nullable: true })
-  timeSlotId?: number | null;
-
-  @ManyToOne(() => TimeSlotEntity, (ts) => ts.tickets, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'time_slot_id' })
-  timeSlot?: TimeSlotEntity | null;
 
   @Column({ name: 'qr_code', type: 'varchar', length: 255, unique: true })
   qrCode!: string;
