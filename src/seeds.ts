@@ -8,10 +8,9 @@ import { UserEntity } from './users/domain/entities/user.entity';
 import { RoleEntity } from './users/domain/entities/role.entity';
 import { ProfileEntity } from './profile/domain/entities/profile.entity';
 import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.entity';
-import { EventEntity } from './events/domain/entities/event.entity';
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
+import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './events/domain/entities/point-of-interest.entity';
-import { TimeSlotEntity } from './entities/time-slot.entity';
 import { TicketEntity } from './entities/ticket.entity';
 import { PaymentEntity } from './entities/payment.entity';
 import { ScanEntity } from './entities/scan.entity';
@@ -21,11 +20,17 @@ import { RouteEntity } from './entities/route.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { IncidentEntity } from './entities/incident.entity';
+import { CityEntity } from './partners/domain/entities/city.entity';
+import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
+import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
 
 // Seeders
 import { RoleSeeder } from './db/seeding/seeds/roles.seeder';
 import { UserSeeder } from './db/seeding/seeds/users.seeder';
 import { EventCategorySeeder } from './db/seeding/seeds/event-categories.seeder';
+import { CitySeeder } from './db/seeding/seeds/cities.seeder';
+import { OrganizerSeeder } from './db/seeding/seeds/organizers.seeder';
+import { SponsorSeeder } from './db/seeding/seeds/sponsors.seeder';
 import { EventSeeder } from './db/seeding/seeds/events.seeder';
 import { PointOfInterestSeeder } from './db/seeding/seeds/points-of-interest.seeder';
 
@@ -44,9 +49,11 @@ const options: DataSourceOptions & SeederOptions = {
     ProfileEntity,
     BlacklistTokenEntity,
     EventCategoryEntity,
+    CityEntity,
+    OrganizerEntity,
+    SponsorEntity,
     EventEntity,
     PointOfInterestEntity,
-    TimeSlotEntity,
     TicketEntity,
     PaymentEntity,
     ScanEntity,
@@ -57,7 +64,16 @@ const options: DataSourceOptions & SeederOptions = {
     NotificationEntity,
     IncidentEntity,
   ],
-  seeds: [RoleSeeder, UserSeeder, EventCategorySeeder, EventSeeder, PointOfInterestSeeder],
+  seeds: [
+    RoleSeeder,
+    UserSeeder,
+    EventCategorySeeder,
+    CitySeeder,
+    OrganizerSeeder,
+    SponsorSeeder,
+    EventSeeder,
+    PointOfInterestSeeder,
+  ],
 };
 
 const dataSource = new DataSource(options);
