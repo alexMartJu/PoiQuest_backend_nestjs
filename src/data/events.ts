@@ -12,8 +12,8 @@ export default [
     isPremium: false,
     price: null,
     capacityPerDay: 500,
-    startDate: '2025-01-15',
-    endDate: '2025-12-31',
+    startDate: '2026-01-15',
+    endDate: '2026-12-31',
     imageFiles: [
       'event1.jpg',
       'event1_1.jpg'
@@ -30,8 +30,8 @@ export default [
     isPremium: true,
     price: 25.00,
     capacityPerDay: 2000,
-    startDate: '2025-07-20',
-    endDate: '2025-07-22',
+    startDate: '2026-07-20',
+    endDate: '2026-07-22',
     imageFiles: [
       'event2.jpg'
     ]
@@ -47,8 +47,8 @@ export default [
     isPremium: true,
     price: 18.50,
     capacityPerDay: 300,
-    startDate: '2025-03-10',
-    endDate: '2025-04-15',
+    startDate: '2026-03-10',
+    endDate: '2026-08-15',
     imageFiles: [
       'event3.jpg'
     ]
@@ -64,8 +64,8 @@ export default [
     isPremium: false,
     price: null,
     capacityPerDay: 30,
-    startDate: '2025-02-01',
-    endDate: '2025-11-30',
+    startDate: '2026-02-01',
+    endDate: '2026-11-30',
     imageFiles: [
       'event4.jpg'
     ]
@@ -81,8 +81,8 @@ export default [
     isPremium: false,
     price: null,
     capacityPerDay: 3000,
-    startDate: '2025-05-10',
-    endDate: '2025-05-14',
+    startDate: '2026-05-10',
+    endDate: '2026-09-14',
     imageFiles: [
       'event5.jpg'
     ]

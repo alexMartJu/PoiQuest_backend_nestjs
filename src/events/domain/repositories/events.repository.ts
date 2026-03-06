@@ -1,6 +1,8 @@
 import { EventEntity } from '../entities/event.entity';
 import { PaginatedResult } from '../types/pagination';
 import { EntityManager } from 'typeorm';
+import { EventAdminFilter } from '../enums/event-admin-filter.enum';
+import { EventStatus } from '../enums/event-status.enum';
 
 export abstract class EventsRepository {
   abstract findAll(): Promise<EventEntity[]>;
@@ -15,6 +17,11 @@ export abstract class EventsRepository {
   abstract findOneByUuidIncludingDeleted(uuid: string): Promise<EventEntity | null>;
 
   abstract findOneByUuid(uuid: string): Promise<EventEntity | null>;
+  /**
+   * Busca un evento por UUID sin filtrar por status, pero excluyendo los eliminados.
+   * Útil para el panel de administración donde se necesita ver cualquier evento no borrado.
+   */
+  abstract findOneByUuidAnyStatus(uuid: string): Promise<EventEntity | null>;
   /**
    * Variante transaccional de `findOneByUuid` que usa un `EntityManager`
    * para realizar la consulta dentro del contexto de una transacción.
@@ -45,4 +52,26 @@ export abstract class EventsRepository {
   abstract save(event: EventEntity): Promise<EventEntity>;
   abstract softDeleteById(id: number): Promise<void>;
   abstract softDeleteByUuid(uuid: string): Promise<void>;
+
+  /**
+   * Lista todos los eventos paginados para el panel de administración,
+   * filtrados por el estado indicado (pending, active, finished, deleted).
+   */
+  abstract findAllForAdmin(
+    filter: EventAdminFilter,
+    cursor: string | undefined,
+    limit: number,
+  ): Promise<PaginatedResult>;
+
+  /**
+   * Devuelve todos los eventos ACTIVE (no eliminados) cuya fecha de fin
+   * sea igual o anterior a la fecha indicada (formato YYYY-MM-DD).
+   * Se usa para el scheduler de cierre automático.
+   */
+  abstract findActiveWithEndDateOnOrBefore(date: string): Promise<EventEntity[]>;
+
+  /**
+   * Marca como FINISHED todos los eventos cuyos ids se indican.
+   */
+  abstract markManyAsFinished(ids: number[]): Promise<void>;
 }

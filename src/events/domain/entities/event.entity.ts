@@ -33,7 +33,7 @@ export class EventEntity {
   @Column({ name: 'category_id', type: 'int' })
   categoryId!: number;
 
-  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.ACTIVE })
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.PENDING })
   status!: EventStatus;
 
   @Column({ name: 'city_id', type: 'int' })

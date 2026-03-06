@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, QueryFailedError, Not, EntityManager } from 'typeorm';
+import { Repository, IsNull, QueryFailedError, Not, EntityManager, LessThanOrEqual, In } from 'typeorm';
 import { EventsRepository } from '../../../domain/repositories/events.repository';
 import { PaginatedResult } from '../../../domain/types/pagination';
 import { EventEntity } from '../../../domain/entities/event.entity';
 import { EventStatus } from '../../../domain/enums/event-status.enum';
+import { EventAdminFilter } from '../../../domain/enums/event-admin-filter.enum';
 import { ConflictError } from '../../../../shared/errors/conflict.error';
 
 @Injectable()
@@ -100,10 +101,18 @@ export class TypeormEventsRepository implements EventsRepository {
   }
 
   async softDeleteByUuid(uuid: string): Promise<void> {
-    const event = await this.findOneByUuid(uuid);
-    if (event) {
+    // Usamos findOneByUuidIncludingDeleted para encontrar el evento sin importar su status
+    const event = await this.findOneByUuidIncludingDeleted(uuid);
+    if (event && !event.deletedAt) {
       await this.eventRepo.softDelete(event.id);
     }
+  }
+
+  async findOneByUuidAnyStatus(uuid: string): Promise<EventEntity | null> {
+    return await this.eventRepo.findOne({
+      where: { uuid, deletedAt: IsNull() },
+      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
+    });
   }
 
   async existsByCategoryId(categoryId: number): Promise<boolean> {
@@ -213,8 +222,71 @@ export class TypeormEventsRepository implements EventsRepository {
 
   async findOneByUuidWithManager(manager: EntityManager, uuid: string): Promise<EventEntity | null> {
     return await manager.getRepository(EventEntity).findOne({
-      where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
+      where: { uuid, deletedAt: IsNull() },
       relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
     });
+  }
+
+  async findAllForAdmin(
+    filter: EventAdminFilter,
+    cursor: string | undefined,
+    limit: number,
+  ): Promise<PaginatedResult> {
+    const qb = this.eventRepo
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.category', 'category')
+      .leftJoinAndSelect('event.city', 'city')
+      .leftJoinAndSelect('event.organizer', 'organizer')
+      .leftJoinAndSelect('event.sponsor', 'sponsor')
+      .orderBy('event.createdAt', 'ASC')
+      .limit(limit + 1);
+
+    if (filter === EventAdminFilter.DELETED) {
+      qb.withDeleted().where('event.deletedAt IS NOT NULL');
+    } else {
+      const statusMap: Record<EventAdminFilter, EventStatus | undefined> = {
+        [EventAdminFilter.PENDING]: EventStatus.PENDING,
+        [EventAdminFilter.ACTIVE]: EventStatus.ACTIVE,
+        [EventAdminFilter.FINISHED]: EventStatus.FINISHED,
+        [EventAdminFilter.DELETED]: undefined,
+      };
+      qb.where('event.status = :status', { status: statusMap[filter] })
+        .andWhere('event.deletedAt IS NULL');
+    }
+
+    if (cursor) {
+      const parsed = new Date(cursor);
+      if (!isNaN(parsed.getTime())) {
+        qb.andWhere('event.createdAt > :cursor', { cursor: parsed });
+      } else {
+        qb.andWhere('event.createdAt > :cursor', { cursor });
+      }
+    }
+
+    const events = await qb.getMany();
+    const hasNextPage = events.length > limit;
+    if (hasNextPage) events.pop();
+
+    const nextCursor =
+      hasNextPage && events.length > 0
+        ? events[events.length - 1].createdAt.toISOString()
+        : null;
+
+    return { data: events, nextCursor, hasNextPage };
+  }
+
+  async findActiveWithEndDateOnOrBefore(date: string): Promise<EventEntity[]> {
+    return await this.eventRepo.find({
+      where: {
+        status: EventStatus.ACTIVE,
+        deletedAt: IsNull(),
+        endDate: LessThanOrEqual(date),
+      },
+    });
+  }
+
+  async markManyAsFinished(ids: number[]): Promise<void> {
+    if (ids.length === 0) return;
+    await this.eventRepo.update({ id: In(ids) }, { status: EventStatus.FINISHED });
   }
 }
