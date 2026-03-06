@@ -45,6 +45,7 @@ export class EventMapper {
       endDate: event.endDate ?? null,
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
+      deletedAt: event.deletedAt ?? null,
       images: ImageMapper.toResponseList(images ?? [], presignedUrlsMap),
     };
 

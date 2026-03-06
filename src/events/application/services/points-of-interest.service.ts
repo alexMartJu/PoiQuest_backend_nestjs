@@ -44,9 +44,9 @@ export class PointsOfInterestService {
     if (event.deletedAt) {
       throw new ValidationError('No se puede asociar un POI a un evento eliminado');
     }
-    // No permitir crear POIs en eventos deshabilitados/que no estén ACTIVE
-    if (event.status !== EventStatus.ACTIVE) {
-      throw new ValidationError('No se puede asociar un POI a un evento deshabilitado o no activo');
+    // Solo se pueden crear POIs en eventos PENDING o ACTIVE
+    if (event.status !== EventStatus.ACTIVE && event.status !== EventStatus.PENDING) {
+      throw new ValidationError('No se pueden crear POIs en eventos finalizados');
     }
 
     // Usar transacción para crear POI e imágenes
@@ -142,10 +142,13 @@ export class PointsOfInterestService {
     return await this.poisRepo.findByEventId(eventId);
   }
 
-  /// Obtiene POIs por uuid del evento
+  /// Obtiene POIs por uuid del evento (solo eventos PENDING o ACTIVE no eliminados)
   async findByEventUuid(eventUuid: string): Promise<PointOfInterestEntity[]> {
-    const event = await this.eventsRepo.findOneByUuid(eventUuid);
+    const event = await this.eventsRepo.findOneByUuidAnyStatus(eventUuid);
     if (!event) {
+      throw new NotFoundError(`Evento con UUID ${eventUuid} no encontrado`);
+    }
+    if (event.status !== EventStatus.ACTIVE && event.status !== EventStatus.PENDING) {
       throw new NotFoundError(`Evento con UUID ${eventUuid} no encontrado`);
     }
     return await this.poisRepo.findByEventId(event.id);

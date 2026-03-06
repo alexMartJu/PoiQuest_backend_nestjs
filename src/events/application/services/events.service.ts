@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { EventsRepository } from '../../domain/repositories/events.repository';
 import { EventCategoriesRepository } from '../../domain/repositories/event-categories.repository';
+import { PointsOfInterestRepository } from '../../domain/repositories/points-of-interest.repository';
 import { EventEntity } from '../../domain/entities/event.entity';
 import { EventStatus } from '../../domain/enums/event-status.enum';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { CursorPaginationDto } from '../dto/cursor-pagination.dto';
 import { PaginatedEventsDto } from '../dto/paginated-events.dto';
+import { AdminEventsPaginationDto } from '../dto/admin-events-pagination.dto';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
 import { ImagesService } from '../../../media/application/services/images.service';
@@ -26,6 +28,7 @@ export class EventsService {
     private readonly citiesRepo: CitiesRepository,
     private readonly organizersRepo: OrganizersRepository,
     private readonly sponsorsRepo: SponsorsRepository,
+    private readonly poisRepo: PointsOfInterestRepository,
   ) {}
 
   /// Obtiene todos los eventos activos (no eliminados)
@@ -141,7 +144,7 @@ export class EventsService {
         isPremium: dto.isPremium,
         price: dto.isPremium ? (dto.price ?? null) : null,
         capacityPerDay: dto.capacityPerDay ?? null,
-        status: EventStatus.ACTIVE,
+        status: EventStatus.PENDING,
         startDate: dto.startDate,
         endDate: dto.endDate ?? null,
       });
@@ -177,8 +180,8 @@ export class EventsService {
     if (event.deletedAt) {
       throw new NotFoundError('Evento no encontrado', { uuid });
     }
-    if (event.status !== EventStatus.ACTIVE) {
-      throw new ValidationError('Solo se pueden actualizar eventos con estado ACTIVE', { uuid, status: event.status });
+    if (event.status === EventStatus.FINISHED) {
+      throw new ValidationError('No se pueden actualizar eventos con estado FINISHED', { uuid, status: event.status });
     }
 
     // Validar ciudad (si se actualiza)
@@ -275,9 +278,9 @@ export class EventsService {
     if (event.deletedAt) {
       throw new NotFoundError('Evento no encontrado', { uuid });
     }
-    // Solo se permite eliminar si el evento está ACTIVE
-    if (event.status !== EventStatus.ACTIVE) {
-      throw new ValidationError('Solo se pueden eliminar eventos con estado ACTIVE', { uuid, status: event.status });
+    // Solo se permite eliminar si el evento está PENDING o ACTIVE
+    if (event.status === EventStatus.FINISHED) {
+      throw new ValidationError('No se pueden eliminar eventos con estado FINISHED', { uuid, status: event.status });
     }
 
     try {
@@ -289,13 +292,73 @@ export class EventsService {
 
   // ============ Funciones auxiliares ============
 
-  // Busca un evento por uuid o lanza NotFoundError
+  // Busca un evento ACTIVE por uuid o lanza NotFoundError (uso público)
   async findEventByUuidOrFail(uuid: string): Promise<EventEntity> {
     const event = await this.eventsRepo.findOneByUuid(uuid);
     if (!event) {
       throw new NotFoundError('Evento no encontrado', { uuid });
     }
     return event;
+  }
+
+  /// Obtiene el detalle de un evento por uuid sin filtrar por estado (uso admin).
+  /// Devuelve cualquier evento no eliminado (pending, active o finished).
+  async findOneByUuidForAdmin(uuid: string): Promise<EventEntity> {
+    const event = await this.eventsRepo.findOneByUuidAnyStatus(uuid);
+    if (!event) {
+      throw new NotFoundError('Evento no encontrado', { uuid });
+    }
+    return event;
+  }
+
+  /// Lista todos los eventos para el administrador con paginación por cursor y filtro de estado
+  async findAllForAdmin(dto: AdminEventsPaginationDto): Promise<PaginatedEventsDto> {
+    const limit = dto.limit ?? 10;
+    const result = await this.eventsRepo.findAllForAdmin(dto.filter, dto.cursor, limit);
+    return {
+      data: result.data,
+      nextCursor: result.nextCursor,
+      hasNextPage: result.hasNextPage,
+    };
+  }
+
+  /// Activa un evento pendiente (PENDING → ACTIVE). Requiere al menos un POI asociado.
+  async activateEventByUuid(uuid: string): Promise<EventEntity> {
+    const event = await this.eventsRepo.findOneByUuidIncludingDeleted(uuid);
+    if (!event || event.deletedAt) {
+      throw new NotFoundError('Evento no encontrado', { uuid });
+    }
+    if (event.status !== EventStatus.PENDING) {
+      throw new ValidationError(
+        'Solo se pueden activar eventos con estado PENDING',
+        { uuid, status: event.status },
+      );
+    }
+
+    const pois = await this.poisRepo.findByEventId(event.id);
+    if (pois.length === 0) {
+      throw new ValidationError(
+        'El evento debe tener al menos un punto de interés asociado antes de poder activarse',
+        { uuid },
+      );
+    }
+
+    event.status = EventStatus.ACTIVE;
+    await this.eventsRepo.save(event);
+
+    // Recuperar el evento con todas sus relaciones ya en estado ACTIVE
+    return await this.findEventByUuidOrFail(uuid);
+  }
+
+  /// Marca como FINISHED todos los eventos ACTIVE cuya fecha de fin ya ha llegado.
+  /// Llamado por el scheduler diario.
+  async markExpiredEventsAsFinished(): Promise<number> {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const events = await this.eventsRepo.findActiveWithEndDateOnOrBefore(today);
+    if (events.length === 0) return 0;
+    const ids = events.map(e => e.id);
+    await this.eventsRepo.markManyAsFinished(ids);
+    return ids.length;
   }
 
   // Valida que la fecha de fin sea posterior a la de inicio

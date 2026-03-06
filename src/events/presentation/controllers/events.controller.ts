@@ -6,12 +6,14 @@ import { EventsService } from '../../application/services/events.service';
 import { CreateEventRequest } from '../dto/requests/create-event.request.dto';
 import { UpdateEventRequest } from '../dto/requests/update-event.request.dto';
 import { CursorPaginationRequest } from '../dto/requests/cursor-pagination.request.dto';
+import { AdminEventsRequest } from '../dto/requests/admin-events.request.dto';
 import { EventResponse } from '../dto/responses/event.response.dto';
 import { PaginatedEventsResponse } from '../dto/responses/paginated-events.response.dto';
 import { EventMapper } from '../mappers/event.mapper';
 import { ImagesService } from '../../../media/application/services/images.service';
 import { FilesService } from '../../../media/application/services/files.service';
 import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
+import { EventAdminFilter } from '../../domain/enums/event-admin-filter.enum';
 import { buildImagesMap } from '../helpers/images-map.helper';
 import { PresignedUrlHelper } from '../helpers/presigned-url.helper';
 import { 
@@ -110,6 +112,58 @@ export class EventsController {
     return EventMapper.toResponseList(entities, false, imagesMap, presignedMap);
   }
 
+  @ApiOperation({ 
+    summary: 'Lista de todos los eventos (admin) con paginación por cursor y filtro de estado',
+    description: 'Obtiene todos los eventos paginados según el filtro indicado. Estados disponibles: pending (pendientes de activar), active (en curso), finished (finalizados), deleted (eliminados con soft delete).'
+  })
+  @ApiQuery({ name: 'filter', required: true, enum: EventAdminFilter, description: 'Estado por el que filtrar los eventos' })
+  @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor ISO 8601 para paginación (createdAt del último evento devuelto)', example: '2025-03-09T12:34:56.000Z' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de items por página. Default 10', example: 10 })
+  @ApiOkResponse({ type: PaginatedEventsResponse, description: 'Lista paginada de eventos según el filtro' })
+  @ApiBadRequestResponse({ type: ErrorResponse, description: 'Parámetros inválidos' })
+  @ApiInternalServerErrorResponse({ type: ErrorResponse, description: 'Error interno del servidor' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
+  @ApiForbiddenResponse({ type: ErrorResponse, description: 'Acceso denegado: se requiere rol admin' })
+  @Get('admin')
+  async getAdminEvents(@Query() query: AdminEventsRequest): Promise<PaginatedEventsResponse> {
+    const result = await this.eventsService.findAllForAdmin(query);
+
+    // Cargar imágenes para todos los eventos en una sola consulta (evita N+1)
+    const eventIds = result.data.map(e => e.id);
+    const allImages = await this.imagesService.fetchImagesByIds(ImageableType.EVENT, eventIds);
+    const imagesMap = buildImagesMap(allImages);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
+
+    return {
+      data: EventMapper.toResponseList(result.data, false, imagesMap, presignedMap),
+      nextCursor: result.nextCursor,
+      hasNextPage: result.hasNextPage,
+    };
+  }
+
+  @ApiOperation({ 
+    summary: 'Detalle de un evento por uuid (admin, cualquier estado)',
+    description: 'Devuelve el detalle de un evento independientemente de su estado (pending, active o finished). No devuelve eventos eliminados.'
+  })
+  @ApiParam({ name: 'uuid', description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiOkResponse({ type: EventResponse, description: 'Detalle del evento con sus puntos de interés' })
+  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado o eliminado' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
+  @ApiForbiddenResponse({ type: ErrorResponse, description: 'Acceso denegado: se requiere rol admin' })
+  @Get('admin/:uuid')
+  async getAdminEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
+    const entity = await this.eventsService.findOneByUuidForAdmin(uuid);
+    const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return EventMapper.toResponse(entity, true, images, presignedMap);
+  }
+
   @ApiOperation({ summary: 'Detalle de un evento activo por uuid (incluye POIs)' })
   @ApiParam({ name: 'uuid', description: 'UUID único del evento activo', example: '550e8400-e29b-41d4-a716-446655440000' })
   @ApiOkResponse({ type: EventResponse, description: 'Detalle del evento activo con sus puntos de interés' })
@@ -164,7 +218,7 @@ export class EventsController {
   @ApiBody({ type: UpdateEventRequest })
   @ApiOkResponse({ type: EventResponse, description: 'Evento actualizado exitosamente' })
   @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
-  @ApiBadRequestResponse({ type: ErrorResponse, description: 'Datos inválidos' })
+  @ApiBadRequestResponse({ type: ErrorResponse, description: 'Datos inválidos, o el evento está en estado FINISHED y no se puede editar' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiBearerAuth()
@@ -181,13 +235,38 @@ export class EventsController {
     return EventMapper.toResponse(entity, false, images, presignedMap);
   }
 
+  @ApiOperation({ 
+    summary: 'Activar un evento pendiente (PENDING → ACTIVE)',
+    description: 'Cambia el estado de un evento de PENDING a ACTIVE. El evento debe tener al menos un punto de interés asociado para poder activarse.'
+  })
+  @ApiParam({ name: 'uuid', description: 'UUID único del evento pendiente a activar', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiOkResponse({ type: EventResponse, description: 'Evento activado exitosamente' })
+  @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
+  @ApiBadRequestResponse({ 
+    type: ErrorResponse, 
+    description: 'El evento no está en estado PENDING, o no tiene puntos de interés asociados' 
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
+  @ApiForbiddenResponse({ type: ErrorResponse, description: 'Acceso denegado: se requiere rol admin' })
+  @HttpCode(HttpStatus.OK)
+  @Patch(':uuid/activate')
+  async activateEvent(@Param('uuid') uuid: string): Promise<EventResponse> {
+    const entity = await this.eventsService.activateEventByUuid(uuid);
+    const images = await this.imagesService.fetchImages(ImageableType.EVENT, entity.id);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    return EventMapper.toResponse(entity, true, images, presignedMap);
+  }
+
   @ApiOperation({ summary: 'Eliminar un evento por uuid (soft delete)' })
   @ApiParam({ name: 'uuid', description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
   @ApiOkResponse({ description: 'Evento eliminado exitosamente' })
   @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
   @ApiBadRequestResponse({
     type: ErrorResponse,
-    description: 'El evento existe pero su estado no permite eliminación (status != ACTIVE).',
+    description: 'El evento está en estado FINISHED y no se puede eliminar.',
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')

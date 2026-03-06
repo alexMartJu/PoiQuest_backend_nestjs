@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { EventsController } from './presentation/controllers/events.controller';
 import { EventCategoriesController } from './presentation/controllers/event-categories.controller';
 import { PointsOfInterestController } from './presentation/controllers/points-of-interest.controller';
 import { EventsService } from './application/services/events.service';
 import { EventCategoriesService } from './application/services/event-categories.service';
 import { PointsOfInterestService } from './application/services/points-of-interest.service';
+import { EventsSchedulerService } from './application/services/events-scheduler.service';
 import { EventEntity } from './domain/entities/event.entity';
 import { EventCategoryEntity } from './domain/entities/event-category.entity';
 import { PointOfInterestEntity } from './domain/entities/point-of-interest.entity';
@@ -22,6 +24,7 @@ import { PartnersModule } from '../partners/partners.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([EventEntity, EventCategoryEntity, PointOfInterestEntity]),
+    ScheduleModule.forRoot(),
     MediaModule,
     MinioClientModule,
     PartnersModule,
@@ -31,6 +34,7 @@ import { PartnersModule } from '../partners/partners.module';
     EventsService,
     EventCategoriesService,
     PointsOfInterestService,
+    EventsSchedulerService,
     { provide: EventsRepository, useClass: TypeormEventsRepository },
     { provide: EventCategoriesRepository, useClass: TypeormEventCategoriesRepository },
     { provide: PointsOfInterestRepository, useClass: TypeormPointsOfInterestRepository },

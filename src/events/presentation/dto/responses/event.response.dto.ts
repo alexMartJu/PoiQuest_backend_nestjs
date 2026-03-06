@@ -76,4 +76,13 @@ export class EventResponse {
     format: 'date-time',
   })
   updatedAt!: Date;
+
+  @ApiPropertyOptional({ 
+    description: 'Fecha de eliminación en ISO 8601. Null si el evento no ha sido eliminado.',
+    example: null,
+    nullable: true,
+    type: String,
+    format: 'date-time',
+  })
+  deletedAt!: Date | null;
 }
