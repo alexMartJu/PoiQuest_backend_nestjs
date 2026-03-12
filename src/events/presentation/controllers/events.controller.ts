@@ -237,14 +237,14 @@ export class EventsController {
 
   @ApiOperation({ 
     summary: 'Activar un evento pendiente (PENDING → ACTIVE)',
-    description: 'Cambia el estado de un evento de PENDING a ACTIVE. El evento debe tener al menos un punto de interés asociado para poder activarse.'
+    description: 'Cambia el estado de un evento de PENDING a ACTIVE. El evento debe tener al menos un punto de interés y al menos una ruta asociados para poder activarse.'
   })
   @ApiParam({ name: 'uuid', description: 'UUID único del evento pendiente a activar', example: '550e8400-e29b-41d4-a716-446655440000' })
   @ApiOkResponse({ type: EventResponse, description: 'Evento activado exitosamente' })
   @ApiNotFoundResponse({ type: ErrorResponse, description: 'Evento no encontrado' })
   @ApiBadRequestResponse({ 
     type: ErrorResponse, 
-    description: 'El evento no está en estado PENDING, o no tiene puntos de interés asociados' 
+    description: 'El evento no está en estado PENDING, no tiene puntos de interés asociados, o no tiene ninguna ruta asociada' 
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')

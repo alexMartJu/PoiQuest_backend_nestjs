@@ -6,6 +6,7 @@ import { ImageResponse } from '../../../../media/presentation/dto/image.response
 import { CityResponse } from '../../../../partners/presentation/dto/responses/city.response.dto';
 import { OrganizerResponse } from '../../../../partners/presentation/dto/responses/organizer.response.dto';
 import { SponsorResponse } from '../../../../partners/presentation/dto/responses/sponsor.response.dto';
+import { RouteSummaryResponse } from './route-summary.response.dto';
 
 export class EventResponse {
   @ApiProperty({ description: 'UUID único del evento', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -57,6 +58,13 @@ export class EventResponse {
     nullable: true
   })
   pointsOfInterest?: Omit<PointOfInterestResponse, 'event'>[] | null;
+
+  @ApiPropertyOptional({
+    type: [RouteSummaryResponse],
+    description: 'Rutas del evento (uuid y nombre)',
+    nullable: true,
+  })
+  routes?: RouteSummaryResponse[] | null;
 
   @ApiProperty({ type: [ImageResponse], description: 'Imágenes del evento' })
   images!: ImageResponse[];

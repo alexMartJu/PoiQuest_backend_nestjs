@@ -17,6 +17,7 @@ import { ImageableType } from '../../../media/domain/enums/imageable-type.enum';
 import { CitiesRepository } from '../../../partners/domain/repositories/cities.repository';
 import { OrganizersRepository } from '../../../partners/domain/repositories/organizers.repository';
 import { SponsorsRepository } from '../../../partners/domain/repositories/sponsors.repository';
+import { RoutesRepository } from '../../domain/repositories/routes.repository';
 
 @Injectable()
 export class EventsService {
@@ -29,6 +30,7 @@ export class EventsService {
     private readonly organizersRepo: OrganizersRepository,
     private readonly sponsorsRepo: SponsorsRepository,
     private readonly poisRepo: PointsOfInterestRepository,
+    private readonly routesRepo: RoutesRepository,
   ) {}
 
   /// Obtiene todos los eventos activos (no eliminados)
@@ -284,6 +286,9 @@ export class EventsService {
     }
 
     try {
+      // Cascade soft delete a POIs y rutas del evento
+      await this.poisRepo.softDeleteByEventId(event.id);
+      await this.routesRepo.softDeleteByEventId(event.id);
       await this.eventsRepo.softDeleteByUuid(uuid);
     } catch (e: any) {
       throw new ValidationError('No se pudo eliminar el evento', { uuid, error: e.message });
@@ -339,6 +344,14 @@ export class EventsService {
     if (pois.length === 0) {
       throw new ValidationError(
         'El evento debe tener al menos un punto de interés asociado antes de poder activarse',
+        { uuid },
+      );
+    }
+
+    const routes = await this.routesRepo.findByEventId(event.id);
+    if (routes.length === 0) {
+      throw new ValidationError(
+        'El evento debe tener al menos una ruta asociada antes de poder activarse',
         { uuid },
       );
     }

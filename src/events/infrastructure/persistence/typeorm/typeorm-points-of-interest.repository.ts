@@ -73,4 +73,12 @@ export class TypeormPointsOfInterestRepository implements PointsOfInterestReposi
       await this.poiRepo.softDelete(poi.id);
     }
   }
+
+  async softDeleteByEventId(eventId: number): Promise<void> {
+    await this.poiRepo
+      .createQueryBuilder()
+      .softDelete()
+      .where('event_id = :eventId AND deleted_at IS NULL', { eventId })
+      .execute();
+  }
 }

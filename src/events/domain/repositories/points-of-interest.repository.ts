@@ -9,4 +9,5 @@ export abstract class PointsOfInterestRepository {
   abstract create(data: Partial<PointOfInterestEntity>): PointOfInterestEntity;
   abstract save(poi: PointOfInterestEntity): Promise<PointOfInterestEntity>;
   abstract softDeleteByUuid(uuid: string): Promise<void>;
+  abstract softDeleteByEventId(eventId: number): Promise<void>;
 }

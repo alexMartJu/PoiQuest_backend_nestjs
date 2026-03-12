@@ -2,6 +2,7 @@ import { EventEntity } from '../../domain/entities/event.entity';
 import { EventResponse } from '../dto/responses/event.response.dto';
 import { EventCategoryMapper } from './event-category.mapper';
 import { PointOfInterestMapper } from './point-of-interest.mapper';
+import { RouteMapper } from './route.mapper';
 import { ImageEntity } from '../../../media/domain/entities/image.entity';
 import { ImageMapper } from '../../../media/presentation/mappers/image.mapper';
 import { CityMapper } from '../../../partners/presentation/mappers/city.mapper';
@@ -56,6 +57,11 @@ export class EventMapper {
         undefined,
         presignedUrlsMap,
       );
+    }
+
+    // Incluir resumen de rutas si están cargadas en la entidad
+    if (event.routes) {
+      response.routes = RouteMapper.toSummaryList(event.routes.filter(r => !r.deletedAt));
     }
 
     return response;

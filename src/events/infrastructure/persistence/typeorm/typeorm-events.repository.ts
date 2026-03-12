@@ -37,7 +37,7 @@ export class TypeormEventsRepository implements EventsRepository {
   async findOneByUuid(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({ 
       where: { uuid, status: EventStatus.ACTIVE, deletedAt: IsNull() },
-      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
+      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest', 'routes'],
     });
   }
 
@@ -111,7 +111,7 @@ export class TypeormEventsRepository implements EventsRepository {
   async findOneByUuidAnyStatus(uuid: string): Promise<EventEntity | null> {
     return await this.eventRepo.findOne({
       where: { uuid, deletedAt: IsNull() },
-      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
+      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest', 'routes'],
     });
   }
 
@@ -223,7 +223,7 @@ export class TypeormEventsRepository implements EventsRepository {
   async findOneByUuidWithManager(manager: EntityManager, uuid: string): Promise<EventEntity | null> {
     return await manager.getRepository(EventEntity).findOne({
       where: { uuid, deletedAt: IsNull() },
-      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest'],
+      relations: ['category', 'city', 'organizer', 'sponsor', 'pointsOfInterest', 'routes'],
     });
   }
 
