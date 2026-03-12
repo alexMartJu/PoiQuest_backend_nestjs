@@ -16,7 +16,8 @@ import { PaymentEntity } from './entities/payment.entity';
 import { ScanEntity } from './entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';
-import { RouteEntity } from './entities/route.entity';
+import { RouteEntity } from './events/domain/entities/route.entity';
+import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { IncidentEntity } from './entities/incident.entity';
@@ -33,6 +34,7 @@ import { OrganizerSeeder } from './db/seeding/seeds/organizers.seeder';
 import { SponsorSeeder } from './db/seeding/seeds/sponsors.seeder';
 import { EventSeeder } from './db/seeding/seeds/events.seeder';
 import { PointOfInterestSeeder } from './db/seeding/seeds/points-of-interest.seeder';
+import { RouteSeeder } from './db/seeding/seeds/routes.seeder';
 
 config();
 
@@ -60,6 +62,7 @@ const options: DataSourceOptions & SeederOptions = {
     AchievementEntity,
     UserAchievementEntity,
     RouteEntity,
+    RoutePoiEntity,
     ImageEntity,
     NotificationEntity,
     IncidentEntity,
@@ -73,6 +76,7 @@ const options: DataSourceOptions & SeederOptions = {
     SponsorSeeder,
     EventSeeder,
     PointOfInterestSeeder,
+    RouteSeeder,
   ],
 };
 

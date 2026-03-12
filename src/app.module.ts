@@ -20,7 +20,8 @@ import { PaymentEntity } from './entities/payment.entity';
 import { ScanEntity } from './entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';
-import { RouteEntity } from './entities/route.entity';
+import { RouteEntity } from './events/domain/entities/route.entity';
+import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { IncidentEntity } from './entities/incident.entity';
@@ -64,6 +65,7 @@ import { PartnersModule } from './partners/partners.module';
           AchievementEntity,
           UserAchievementEntity,
           RouteEntity,
+          RoutePoiEntity,
           ImageEntity,
           NotificationEntity,
           IncidentEntity,
