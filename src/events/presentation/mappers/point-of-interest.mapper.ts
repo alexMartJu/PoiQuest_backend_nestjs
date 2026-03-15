@@ -8,7 +8,8 @@ export class PointOfInterestMapper {
   static toResponse(
     poi: PointOfInterestEntity, 
     images?: ImageEntity[], 
-    presignedUrlsMap?: Map<number, string>
+    presignedUrlsMap?: Map<number, string>,
+    modelUrl?: string | null,
   ): PointOfInterestResponse {
     const response: PointOfInterestResponse = {
       uuid: poi.uuid,
@@ -16,9 +17,10 @@ export class PointOfInterestMapper {
       title: poi.title,
       author: poi.author ?? null,
       description: poi.description ?? null,
-      multimedia: poi.multimedia ?? null,
+      interestingData: poi.interestingData ?? null,
+      modelFileName: poi.modelFileName ?? null,
+      modelUrl: modelUrl ?? null,
       qrCode: poi.qrCode,
-      nfcTag: poi.nfcTag ?? null,
       coordX: poi.coordX ?? null,
       coordY: poi.coordY ?? null,
       createdAt: poi.createdAt,
@@ -36,11 +38,13 @@ export class PointOfInterestMapper {
   static toResponseList(
     list: PointOfInterestEntity[], 
     imagesMap?: Map<number, ImageEntity[]>,
-    presignedUrlsMap?: Map<number, string>
+    presignedUrlsMap?: Map<number, string>,
+    modelUrlsMap?: Map<number, string>,
   ): PointOfInterestResponse[] {
     return list.map(poi => {
       const images = imagesMap?.get(poi.id);
-      return PointOfInterestMapper.toResponse(poi, images, presignedUrlsMap);
+      const modelUrl = modelUrlsMap?.get(poi.id) ?? null;
+      return PointOfInterestMapper.toResponse(poi, images, presignedUrlsMap, modelUrl);
     });
   }
 
@@ -51,16 +55,18 @@ export class PointOfInterestMapper {
   static toResponseWithoutEvent(
     poi: PointOfInterestEntity, 
     images?: ImageEntity[],
-    presignedUrlsMap?: Map<number, string>
+    presignedUrlsMap?: Map<number, string>,
+    modelUrl?: string | null,
   ): Omit<PointOfInterestResponse, 'event'> {
     const response: Omit<PointOfInterestResponse, 'event'> = {
       uuid: poi.uuid,
       title: poi.title,
       author: poi.author ?? null,
       description: poi.description ?? null,
-      multimedia: poi.multimedia ?? null,
+      interestingData: poi.interestingData ?? null,
+      modelFileName: poi.modelFileName ?? null,
+      modelUrl: modelUrl ?? null,
       qrCode: poi.qrCode,
-      nfcTag: poi.nfcTag ?? null,
       coordX: poi.coordX ?? null,
       coordY: poi.coordY ?? null,
       createdAt: poi.createdAt,
@@ -78,11 +84,13 @@ export class PointOfInterestMapper {
   static toResponseListWithoutEvent(
     list: PointOfInterestEntity[], 
     imagesMap?: Map<number, ImageEntity[]>,
-    presignedUrlsMap?: Map<number, string>
+    presignedUrlsMap?: Map<number, string>,
+    modelUrlsMap?: Map<number, string>,
   ): Omit<PointOfInterestResponse, 'event'>[] {
     return list.map(poi => {
       const images = imagesMap?.get(poi.id);
-      return PointOfInterestMapper.toResponseWithoutEvent(poi, images, presignedUrlsMap);
+      const modelUrl = modelUrlsMap?.get(poi.id) ?? null;
+      return PointOfInterestMapper.toResponseWithoutEvent(poi, images, presignedUrlsMap, modelUrl);
     });
   }
 }

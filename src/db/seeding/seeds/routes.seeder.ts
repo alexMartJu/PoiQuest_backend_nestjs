@@ -18,7 +18,7 @@ export class RouteSeeder implements Seeder {
     const eventMap = new Map(events.map(e => [e.name.toLowerCase(), e.id]));
 
     const pois = await poiRepo.find();
-    const poiMap = new Map(pois.map(p => [p.qrCode, p.id]));
+    const poiMap = new Map(pois.map(p => [p.title.toLowerCase(), p.id]));
 
     await dataSource.transaction(async (manager) => {
       for (const routeData of routesData) {
@@ -28,9 +28,9 @@ export class RouteSeeder implements Seeder {
         }
 
         // Verificar que todos los POIs existen
-        for (const qrCode of routeData.poiQrCodes) {
-          if (!poiMap.has(qrCode)) {
-            throw new Error(`POI with QR code not found for route seeder: ${qrCode}`);
+        for (const title of routeData.poiTitles) {
+          if (!poiMap.has(title.toLowerCase())) {
+            throw new Error(`POI with title not found for route seeder: ${title}`);
           }
         }
 
@@ -41,8 +41,8 @@ export class RouteSeeder implements Seeder {
         });
         const saved = await manager.save(RouteEntity, route);
 
-        for (let i = 0; i < routeData.poiQrCodes.length; i++) {
-          const poiId = poiMap.get(routeData.poiQrCodes[i])!;
+        for (let i = 0; i < routeData.poiTitles.length; i++) {
+          const poiId = poiMap.get(routeData.poiTitles[i].toLowerCase())!;
           const rp = routePoiRepo.create({
             routeId: saved.id,
             poiId,

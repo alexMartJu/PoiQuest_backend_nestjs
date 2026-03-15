@@ -18,14 +18,17 @@ export class PointOfInterestResponse {
   @ApiPropertyOptional({ description: 'Descripción del POI', nullable: true })
   description!: string | null;
 
-  @ApiPropertyOptional({ description: 'Contenido multimedia en formato JSON', nullable: true })
-  multimedia!: Record<string, any> | null;
+  @ApiPropertyOptional({ description: 'Datos interesantes del POI para mostrar en AR', nullable: true })
+  interestingData!: string | null;
 
-  @ApiProperty({ description: 'Código QR único del POI' })
+  @ApiPropertyOptional({ description: 'Nombre del archivo del modelo 3D (.glb) en MinIO', nullable: true })
+  modelFileName!: string | null;
+
+  @ApiPropertyOptional({ description: 'URL presigned del modelo 3D (.glb) para AR', nullable: true })
+  modelUrl!: string | null;
+
+  @ApiProperty({ description: 'Código QR único del POI (deep link auto-generado)' })
   qrCode!: string;
-
-  @ApiPropertyOptional({ description: 'Tag NFC del POI', nullable: true })
-  nfcTag!: string | null;
 
   @ApiPropertyOptional({ description: 'Coordenada X del POI', nullable: true })
   coordX!: number | null;

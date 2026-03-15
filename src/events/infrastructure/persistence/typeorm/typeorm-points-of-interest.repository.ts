@@ -60,7 +60,7 @@ export class TypeormPointsOfInterestRepository implements PointsOfInterestReposi
       if (err instanceof QueryFailedError) {
         const driverErr = (err as any).driverError;
         if (driverErr.code === 'ER_DUP_ENTRY') {
-          throw new ConflictError('El QR Code o NFC Tag ya existe');
+          throw new ConflictError('El QR Code ya existe');
         }
       }
       throw err;

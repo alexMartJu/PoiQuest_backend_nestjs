@@ -10,7 +10,6 @@ import { ScanEntity } from '../../../entities/scan.entity';
 @Index('uq_poi_uuid', ['uuid'], { unique: true })
 @Index('idx_poi_event', ['eventId'])
 @Index('uq_poi_qr_code', ['qrCode'], { unique: true })
-@Index('uq_poi_nfc_tag', ['nfcTag'], { unique: true })
 export class PointOfInterestEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -30,32 +29,14 @@ export class PointOfInterestEntity {
   @Column({ type: 'text', nullable: true })
   description?: string | null;
 
-  @Column({
-    type: 'longtext',
-    nullable: true,
-    collation: 'utf8mb4_bin',
-    transformer: {
-      to: (val: Record<string, any> | null) => {
-        return val === null || val === undefined ? null : JSON.stringify(val);
-      },
-      from: (val: string | null) => {
-        if (val === null || val === undefined) return null;
-        try {
-          return JSON.parse(val);
-        } catch (e) {
-          // Si el contenido no es JSON válido, devolvemos null para evitar excepciones
-          return null;
-        }
-      },
-    },
-  })
-  multimedia?: Record<string, any> | null;
+  @Column({ name: 'interesting_data', type: 'text', nullable: true })
+  interestingData?: string | null;
+
+  @Column({ name: 'model_file_name', type: 'varchar', length: 500, nullable: true })
+  modelFileName?: string | null;
 
   @Column({ name: 'qr_code', type: 'varchar', length: 255, unique: true })
   qrCode!: string;
-
-  @Column({ name: 'nfc_tag', type: 'varchar', length: 255, nullable: true, unique: true })
-  nfcTag?: string | null;
 
   @Column({ name: 'coord_x', type: 'float', nullable: true })
   coordX?: number | null;
@@ -82,9 +63,13 @@ export class PointOfInterestEntity {
 
   // --- Hooks ---
   @BeforeInsert()
-  setUuid() {
+  generateIdentifiers() {
     if (!this.uuid) {
       this.uuid = randomUUID();
+    }
+    // El QR se genera automáticamente como deep link al POI
+    if (!this.qrCode) {
+      this.qrCode = `poiquest://poi/${this.uuid}`;
     }
   }
 }

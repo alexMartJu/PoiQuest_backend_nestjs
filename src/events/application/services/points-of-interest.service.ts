@@ -56,9 +56,9 @@ export class PointsOfInterestService {
         title: dto.title,
         author: dto.author ?? null,
         description: dto.description ?? null,
-        multimedia: dto.multimedia ?? null,
-        qrCode: dto.qrCode,
-        nfcTag: dto.nfcTag ?? null,
+        interestingData: dto.interestingData,
+        modelFileName: dto.modelFileName,
+        // qrCode se auto-genera en el hook @BeforeInsert de la entidad
         coordX: dto.coordX ?? null,
         coordY: dto.coordY ?? null,
       });
@@ -97,9 +97,8 @@ export class PointsOfInterestService {
       if (dto.title !== undefined) poi.title = dto.title;
       if (dto.author !== undefined) poi.author = dto.author ?? null;
       if (dto.description !== undefined) poi.description = dto.description ?? null;
-      if (dto.multimedia !== undefined) poi.multimedia = dto.multimedia ?? null;
-      if (dto.qrCode !== undefined) poi.qrCode = dto.qrCode;
-      if (dto.nfcTag !== undefined) poi.nfcTag = dto.nfcTag ?? null;
+      poi.interestingData = dto.interestingData;
+      poi.modelFileName = dto.modelFileName;
       if (dto.coordX !== undefined) poi.coordX = dto.coordX ?? null;
       if (dto.coordY !== undefined) poi.coordY = dto.coordY ?? null;
 

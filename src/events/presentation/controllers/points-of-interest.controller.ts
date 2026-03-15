@@ -49,7 +49,11 @@ export class PointsOfInterestController {
     const imagesMap = buildImagesMap(allImages);
     const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
 
-    return PointOfInterestMapper.toResponseList(entities, imagesMap, presignedMap);
+    // Generar URLs presigned para modelos 3D
+    const buckets = this.filesService.getBuckets();
+    const modelUrlsMap = await PresignedUrlHelper.generateModelUrlsMap(entities, buckets.models, this.filesService);
+
+    return PointOfInterestMapper.toResponseList(entities, imagesMap, presignedMap, modelUrlsMap);
   }
 
   @ApiOperation({ summary: 'Lista de todos los POIs (admin)' })
@@ -67,7 +71,11 @@ export class PointsOfInterestController {
     const imagesMap = buildImagesMap(allImages);
     const presignedMap = await PresignedUrlHelper.generatePresignedUrlsForMap(imagesMap, this.filesService);
 
-    return PointOfInterestMapper.toResponseList(entities, imagesMap, presignedMap);
+    // Generar URLs presigned para modelos 3D
+    const buckets = this.filesService.getBuckets();
+    const modelUrlsMap = await PresignedUrlHelper.generateModelUrlsMap(entities, buckets.models, this.filesService);
+
+    return PointOfInterestMapper.toResponseList(entities, imagesMap, presignedMap, modelUrlsMap);
   }
 
   @ApiOperation({ summary: 'Detalle de un POI por uuid (público)' })
@@ -81,7 +89,9 @@ export class PointsOfInterestController {
     const entity = await this.poisService.findOneByUuid(uuid);
     const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
     const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
-    return PointOfInterestMapper.toResponse(entity, images, presignedMap);
+    const buckets = this.filesService.getBuckets();
+    const modelUrl = await PresignedUrlHelper.generateModelUrl(entity.modelFileName ?? null, buckets.models, this.filesService);
+    return PointOfInterestMapper.toResponse(entity, images, presignedMap, modelUrl);
   }
 
   @ApiOperation({ summary: 'Crear un nuevo POI (admin)' })
@@ -96,7 +106,9 @@ export class PointsOfInterestController {
   async createPoi(@Body() dto: CreatePointOfInterestRequest): Promise<PointOfInterestResponse> {
     const entity = await this.poisService.createPoi(dto);
     const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
-    return PointOfInterestMapper.toResponse(entity, images);
+    const buckets = this.filesService.getBuckets();
+    const modelUrl = await PresignedUrlHelper.generateModelUrl(entity.modelFileName ?? null, buckets.models, this.filesService);
+    return PointOfInterestMapper.toResponse(entity, images, undefined, modelUrl);
   }
 
   @ApiOperation({ summary: 'Actualizar un POI por uuid (admin)' })
@@ -116,7 +128,10 @@ export class PointsOfInterestController {
   ): Promise<PointOfInterestResponse> {
     const entity = await this.poisService.updateByUuid(uuid, dto);
     const images = await this.imagesService.fetchImages(ImageableType.POI, entity.id);
-    return PointOfInterestMapper.toResponse(entity, images);
+    const presignedMap = await PresignedUrlHelper.generatePresignedUrls(images, this.filesService);
+    const buckets = this.filesService.getBuckets();
+    const modelUrl = await PresignedUrlHelper.generateModelUrl(entity.modelFileName ?? null, buckets.models, this.filesService);
+    return PointOfInterestMapper.toResponse(entity, images, presignedMap, modelUrl);
   }
 
   @ApiOperation({ summary: 'Eliminar un POI por uuid (soft delete) (admin)' })

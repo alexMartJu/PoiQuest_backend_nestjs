@@ -58,4 +58,50 @@ export class PresignedUrlHelper {
 
     return await this.generatePresignedUrls(allImages, filesService, expirySeconds);
   }
+
+  /**
+   * Genera la URL presigned para un único modelo 3D (.glb)
+   * @param modelFileName - Nombre del archivo en MinIO (o null)
+   * @param modelsBucket - Bucket donde están los modelos
+   * @param filesService - Servicio de archivos
+   * @returns URL presigned o null si no hay modelo o falla
+   */
+  static async generateModelUrl(
+    modelFileName: string | null,
+    modelsBucket: string,
+    filesService: FilesService,
+    expirySeconds: number = 86400,
+  ): Promise<string | null> {
+    if (!modelFileName) return null;
+    try {
+      const result = await filesService.generatePresignedGetUrl(modelsBucket, modelFileName, expirySeconds);
+      return result.url;
+    } catch (error) {
+      console.error(`Error al generar URL presigned para modelo ${modelFileName}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Genera URLs presigned de modelos 3D para una lista de entidades con modelFileName
+   * @param entities - Array con id y modelFileName
+   * @param modelsBucket - Bucket donde están los modelos
+   * @param filesService - Servicio de archivos
+   * @returns Map de entityId a URL presigned del modelo
+   */
+  static async generateModelUrlsMap(
+    entities: Array<{ id: number; modelFileName?: string | null }>,
+    modelsBucket: string,
+    filesService: FilesService,
+    expirySeconds: number = 86400,
+  ): Promise<Map<number, string>> {
+    const map = new Map<number, string>();
+    for (const entity of entities) {
+      if (entity.modelFileName) {
+        const url = await this.generateModelUrl(entity.modelFileName, modelsBucket, filesService, expirySeconds);
+        if (url) map.set(entity.id, url);
+      }
+    }
+    return map;
+  }
 }

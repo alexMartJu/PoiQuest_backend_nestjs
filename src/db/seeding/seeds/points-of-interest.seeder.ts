@@ -27,15 +27,14 @@ export class PointOfInterestSeeder implements Seeder {
           throw new Error(`Event not found: ${poiData.eventName}`);
         }
         
-        // Crear el POI
+        // Crear el POI (qrCode se auto-genera en el hook @BeforeInsert)
         const poi = poiRepo.create({
           eventId: eventId,
           title: poiData.title,
           author: poiData.author,
           description: poiData.description,
-          multimedia: poiData.multimedia,
-          qrCode: poiData.qrCode,
-          nfcTag: poiData.nfcTag,
+          interestingData: poiData.interestingData ?? null,
+          modelFileName: poiData.modelFileName ?? null,
           coordX: poiData.coordX,
           coordY: poiData.coordY,
         });

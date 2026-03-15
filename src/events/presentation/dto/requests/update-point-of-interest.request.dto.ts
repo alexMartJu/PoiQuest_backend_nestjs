@@ -1,5 +1,5 @@
-import { IsString, IsOptional, MaxLength, IsNumber, IsObject, IsArray, ArrayMaxSize } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsNotEmpty, MaxLength, IsNumber, IsArray, ArrayMaxSize } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdatePointOfInterestRequest {
   @ApiPropertyOptional({ maxLength: 255, description: 'Título del punto de interés' })
@@ -19,22 +19,16 @@ export class UpdatePointOfInterestRequest {
   @IsOptional()
   description?: string | null;
 
-  @ApiPropertyOptional({ description: 'Contenido multimedia en formato JSON', nullable: true, example: null, type: Object })
-  @IsObject()
-  @IsOptional()
-  multimedia?: Record<string, any> | null;
-
-  @ApiPropertyOptional({ maxLength: 255, description: 'Código QR único del POI' })
+  @ApiProperty({ description: 'Datos interesantes del POI (texto libre para mostrar en AR)' })
   @IsString()
-  @MaxLength(255)
-  @IsOptional()
-  qrCode?: string;
+  @IsNotEmpty({ message: 'Los datos interesantes son obligatorios' })
+  interestingData!: string;
 
-  @ApiPropertyOptional({ maxLength: 255, description: 'Tag NFC del POI', nullable: true, example: null, type: String })
+  @ApiProperty({ maxLength: 500, description: 'Nombre del archivo .glb en MinIO (bucket models)' })
   @IsString()
-  @MaxLength(255)
-  @IsOptional()
-  nfcTag?: string | null;
+  @IsNotEmpty({ message: 'El modelo 3D (.glb) es obligatorio' })
+  @MaxLength(500)
+  modelFileName!: string;
 
   @ApiPropertyOptional({ description: 'Coordenada X del POI', nullable: true, example: null, type: Number })
   @IsNumber()

@@ -4,16 +4,10 @@ export default [
     title: 'Las Meninas',
     author: 'Diego Velázquez',
     description: 'Obra maestra del barroco español, pintada en 1656. Representa a la infanta Margarita rodeada de sus damas de compañía.',
-    qrCode: 'QR_PRADO_MENINAS_001',
-    nfcTag: 'NFC_PRADO_MENINAS_001',
+    interestingData: 'Pintada en 1656 | Técnica: óleo sobre lienzo | Dimensiones: 318 x 276 cm | Ubicada en la sala 12 del museo | Una de las obras más estudiadas de la historia del arte occidental.',
+    modelFileName: null,
     coordX: 40.4138,
     coordY: -3.6921,
-    multimedia: {
-      images: [
-        // assets multimedia (no subir al bucket si no es necesario)
-      ],
-      audio: null
-    },
     imageFiles: [
       'poi1.jpg'
     ]
@@ -23,13 +17,10 @@ export default [
     title: 'El Jardín de las Delicias',
     author: 'El Bosco',
     description: 'Tríptico pintado entre 1490 y 1500. Una de las obras más enigmáticas y fascinantes del arte occidental.',
-    qrCode: 'QR_PRADO_JARDIN_002',
-    nfcTag: 'NFC_PRADO_JARDIN_002',
+    interestingData: 'Pintado entre 1490-1500 | Técnica: óleo sobre tabla | Tres paneles: El Paraíso, El Jardín y El Infierno | Pleno significado simbólico aún en debate entre los expertos.',
+    modelFileName: null,
     coordX: 40.4139,
     coordY: -3.6920,
-    multimedia: {
-      images: [],
-    },
     imageFiles: [
       'poi2.jpg'
     ]
@@ -39,11 +30,10 @@ export default [
     title: 'Entrada Principal',
     author: null,
     description: 'Punto de acceso principal al recinto del concierto. Escanea para registrar tu entrada.',
-    qrCode: 'QR_ROCK_ENTRADA_001',
-    nfcTag: 'NFC_ROCK_ENTRADA_001',
+    interestingData: null,
+    modelFileName: null,
     coordX: 40.4425,
     coordY: -3.6935,
-    multimedia: null,
     imageFiles: [
       'poi3.jpg'
     ]
@@ -53,11 +43,10 @@ export default [
     title: 'Zona VIP',
     author: null,
     description: 'Acceso exclusivo para asistentes VIP. Disfruta de una experiencia premium.',
-    qrCode: 'QR_ROCK_VIP_002',
-    nfcTag: 'NFC_ROCK_VIP_002',
+    interestingData: null,
+    modelFileName: null,
     coordX: 40.4426,
     coordY: -3.6934,
-    multimedia: null,
     imageFiles: [
       'poi4.jpg'
     ]
@@ -67,14 +56,10 @@ export default [
     title: 'Catedral de la Almudena',
     author: null,
     description: 'Catedral de la Almudena, construida entre los siglos XIX y XX; importante templo en el corazón de Madrid.',
-    qrCode: 'QR_MADRID_ALMUDENA_001',
-    nfcTag: 'NFC_MADRID_ALMUDENA_001',
+    interestingData: 'Construcción: 1879-1993 | Estilo: neogótico y neorromanico | Capacidad: 3.000 personas | Sede de la boda real de Felipe VI y Letizia en 2004.',
+    modelFileName: null,
     coordX: 40.4170,
     coordY: -3.7143,
-    multimedia: {
-      images: [],
-      video: null
-    },
     imageFiles: [
       'poi5.jpg'
     ]
@@ -84,13 +69,10 @@ export default [
     title: 'Plaza Mayor',
     author: null,
     description: 'Plaza Mayor de Madrid, emblemática plaza porticada del siglo XVII en el centro histórico de la ciudad.',
-    qrCode: 'QR_MADRID_PLAZA_MAYOR_002',
-    nfcTag: 'NFC_MADRID_PLAZA_MAYOR_002',
+    interestingData: 'Construida en 1619 | Arquitecto: Juan Gómez de Mora | 237 metros de largo | 129 metros de ancho | Escenario histórico de proclamaciones reales y autos de fe.',
+    modelFileName: null,
     coordX: 40.4155,
     coordY: -3.7074,
-    multimedia: {
-      images: []
-    },
     imageFiles: [
       'poi6.jpg'
     ]
