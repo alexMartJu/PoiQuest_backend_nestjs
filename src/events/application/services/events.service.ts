@@ -73,6 +73,13 @@ export class EventsService {
       categoryUuid,
       pagination.cursor,
       limit,
+      {
+        cityUuid: pagination.cityUuid,
+        minPrice: pagination.minPrice,
+        maxPrice: pagination.maxPrice,
+        startDate: pagination.startDate,
+        endDate: pagination.endDate,
+      },
     );
 
     return {
@@ -87,13 +94,24 @@ export class EventsService {
     pagination: CursorPaginationDto,
   ): Promise<PaginatedEventsDto> {
     const limit = pagination.limit ?? 3;
-    const result = await this.eventsRepo.findAllWithCursor(pagination.cursor, limit);
+    const result = await this.eventsRepo.findAllWithCursor(pagination.cursor, limit, {
+      cityUuid: pagination.cityUuid,
+      minPrice: pagination.minPrice,
+      maxPrice: pagination.maxPrice,
+      startDate: pagination.startDate,
+      endDate: pagination.endDate,
+    });
 
     return {
       data: result.data,
       nextCursor: result.nextCursor,
       hasNextPage: result.hasNextPage,
     };
+  }
+
+  /// Devuelve el rango de precios (min, max) de los eventos activos
+  async getPriceRange(): Promise<{ min: number; max: number }> {
+    return this.eventsRepo.findPriceRange();
   }
 
   /// Crea un nuevo evento

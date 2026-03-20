@@ -4,6 +4,14 @@ import { EntityManager } from 'typeorm';
 import { EventAdminFilter } from '../enums/event-admin-filter.enum';
 import { EventStatus } from '../enums/event-status.enum';
 
+export interface EventFilters {
+  cityUuid?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
 export abstract class EventsRepository {
   abstract findAll(): Promise<EventEntity[]>;
   abstract findAllFinished(): Promise<EventEntity[]>;
@@ -33,17 +41,20 @@ export abstract class EventsRepository {
    * @param categoryUuid UUID de la categoría
    * @param cursor Timestamp ISO del último evento de la página anterior (opcional)
    * @param limit Número de eventos a devolver
+   * @param filters Filtros opcionales (ciudad, precio, fechas)
    */
   abstract findByCategoryWithCursor(
     categoryUuid: string, 
     cursor: string | undefined, 
-    limit: number
+    limit: number,
+    filters?: EventFilters,
   ): Promise<PaginatedResult>;
 
   /** Obtiene eventos activos con paginación basada en cursor (sin filtrar por categoría). */
   abstract findAllWithCursor(
     cursor: string | undefined,
     limit: number,
+    filters?: EventFilters,
   ): Promise<PaginatedResult>;
   
   /** Devuelve true si existe al menos un evento no eliminado asociado a la categoría */
@@ -74,4 +85,9 @@ export abstract class EventsRepository {
    * Marca como FINISHED todos los eventos cuyos ids se indican.
    */
   abstract markManyAsFinished(ids: number[]): Promise<void>;
+
+  /**
+   * Devuelve el rango de precios (min, max) de los eventos activos no eliminados.
+   */
+  abstract findPriceRange(): Promise<{ min: number; max: number }>;
 }

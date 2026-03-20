@@ -50,6 +50,11 @@ export class EventsController {
   @ApiBadRequestResponse({ type: ErrorResponse, description: 'Parámetros de paginación inválidos' })
   @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor ISO 8601 para paginación (createdAt). Usar el valor devuelto en nextCursor para continuar.', example: '2025-03-09T12:34:56.000Z' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de items por página. Default 3', example: 3 })
+  @ApiQuery({ name: 'cityUuid', required: false, type: String, description: 'UUID de la ciudad para filtrar eventos' })
+  @ApiQuery({ name: 'minPrice', required: false, type: Number, description: 'Precio mínimo (EUR)' })
+  @ApiQuery({ name: 'maxPrice', required: false, type: Number, description: 'Precio máximo (EUR)' })
+  @ApiQuery({ name: 'startDate', required: false, type: String, description: 'Fecha inicio mínima (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, type: String, description: 'Fecha fin máxima (YYYY-MM-DD)' })
   @ApiInternalServerErrorResponse({ type: ErrorResponse, description: 'Error interno del servidor' })
   @Public()
   @Get('category/:categoryUuid')
@@ -72,10 +77,33 @@ export class EventsController {
     };
   }
 
+  @ApiOperation({ summary: 'Rango de precios de eventos activos' })
+  @ApiOkResponse({
+    description: 'Rango de precios (min y max) de los eventos activos',
+    schema: {
+      type: 'object',
+      properties: {
+        min: { type: 'number', example: 0 },
+        max: { type: 'number', example: 99.99 },
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({ type: ErrorResponse, description: 'Error interno del servidor' })
+  @Public()
+  @Get('price-range')
+  async getPriceRange(): Promise<{ min: number; max: number }> {
+    return this.eventsService.getPriceRange();
+  }
+
   @ApiOperation({ summary: 'Lista de todos los eventos activos (paginación por cursor)' })
   @ApiOkResponse({ type: PaginatedEventsResponse, description: 'Lista paginada de eventos activos' })
   @ApiQuery({ name: 'cursor', required: false, type: String, description: 'Cursor ISO 8601 para paginación (createdAt). Usar el valor devuelto en nextCursor para continuar.', example: '2025-03-09T12:34:56.000Z' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de items por página. Default 3', example: 3 })
+  @ApiQuery({ name: 'cityUuid', required: false, type: String, description: 'UUID de la ciudad para filtrar eventos' })
+  @ApiQuery({ name: 'minPrice', required: false, type: Number, description: 'Precio mínimo (EUR)' })
+  @ApiQuery({ name: 'maxPrice', required: false, type: Number, description: 'Precio máximo (EUR)' })
+  @ApiQuery({ name: 'startDate', required: false, type: String, description: 'Fecha inicio mínima (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, type: String, description: 'Fecha fin máxima (YYYY-MM-DD)' })
   @Public()
   @Get()
   async getEvents(@Query() pagination: CursorPaginationRequest): Promise<PaginatedEventsResponse> {

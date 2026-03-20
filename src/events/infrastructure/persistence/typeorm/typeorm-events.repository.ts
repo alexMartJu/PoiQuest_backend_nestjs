@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, QueryFailedError, Not, EntityManager, LessThanOrEqual, In } from 'typeorm';
-import { EventsRepository } from '../../../domain/repositories/events.repository';
+import { EventsRepository, EventFilters } from '../../../domain/repositories/events.repository';
 import { PaginatedResult } from '../../../domain/types/pagination';
 import { EventEntity } from '../../../domain/entities/event.entity';
 import { EventStatus } from '../../../domain/enums/event-status.enum';
@@ -128,6 +128,7 @@ export class TypeormEventsRepository implements EventsRepository {
     categoryUuid: string,
     cursor: string | undefined,
     limit: number,
+    filters?: EventFilters,
   ): Promise<PaginatedResult> {
     const queryBuilder = this.eventRepo
       .createQueryBuilder('event')
@@ -158,6 +159,9 @@ export class TypeormEventsRepository implements EventsRepository {
       }
     }
 
+    // Aplicar filtros opcionales
+    this.applyFilters(queryBuilder, filters);
+
     const events = await queryBuilder.getMany();
 
     // Determinamos si hay siguiente página
@@ -181,6 +185,7 @@ export class TypeormEventsRepository implements EventsRepository {
   async findAllWithCursor(
     cursor: string | undefined,
     limit: number,
+    filters?: EventFilters,
   ): Promise<PaginatedResult> {
     const queryBuilder = this.eventRepo
       .createQueryBuilder('event')
@@ -201,6 +206,9 @@ export class TypeormEventsRepository implements EventsRepository {
         queryBuilder.andWhere('event.createdAt > :cursor', { cursor });
       }
     }
+
+    // Aplicar filtros opcionales
+    this.applyFilters(queryBuilder, filters);
 
     const events = await queryBuilder.getMany();
 
@@ -288,5 +296,50 @@ export class TypeormEventsRepository implements EventsRepository {
   async markManyAsFinished(ids: number[]): Promise<void> {
     if (ids.length === 0) return;
     await this.eventRepo.update({ id: In(ids) }, { status: EventStatus.FINISHED });
+  }
+
+  async findPriceRange(): Promise<{ min: number; max: number }> {
+    const result = await this.eventRepo
+      .createQueryBuilder('event')
+      .select('COALESCE(MIN(COALESCE(event.price, 0)), 0)', 'min')
+      .addSelect('COALESCE(MAX(COALESCE(event.price, 0)), 0)', 'max')
+      .where('event.status = :status', { status: EventStatus.ACTIVE })
+      .andWhere('event.deletedAt IS NULL')
+      .getRawOne();
+
+    return {
+      min: parseFloat(result?.min ?? '0'),
+      max: parseFloat(result?.max ?? '0'),
+    };
+  }
+
+  /**
+   * Aplica filtros opcionales al QueryBuilder de eventos.
+   */
+  private applyFilters(
+    qb: import('typeorm').SelectQueryBuilder<EventEntity>,
+    filters?: EventFilters,
+  ): void {
+    if (!filters) return;
+
+    if (filters.cityUuid) {
+      qb.andWhere('city.uuid = :cityUuid', { cityUuid: filters.cityUuid });
+    }
+
+    if (filters.minPrice !== undefined) {
+      qb.andWhere('COALESCE(event.price, 0) >= :minPrice', { minPrice: filters.minPrice });
+    }
+
+    if (filters.maxPrice !== undefined) {
+      qb.andWhere('COALESCE(event.price, 0) <= :maxPrice', { maxPrice: filters.maxPrice });
+    }
+
+    if (filters.startDate) {
+      qb.andWhere('event.startDate >= :filterStartDate', { filterStartDate: filters.startDate });
+    }
+
+    if (filters.endDate) {
+      qb.andWhere('(event.endDate IS NOT NULL AND event.endDate <= :filterEndDate)', { filterEndDate: filters.endDate });
+    }
   }
 }
