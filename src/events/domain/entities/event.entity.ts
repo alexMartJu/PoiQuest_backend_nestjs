@@ -4,7 +4,7 @@ import {
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { PointOfInterestEntity } from './point-of-interest.entity';
-import { TicketEntity } from '../../../entities/ticket.entity';
+import { TicketEntity } from '../../../payments/domain/entities/ticket.entity';
 import { RouteEntity } from './route.entity';
 import { EventCategoryEntity } from './event-category.entity';
 import { EventStatus } from '../enums/event-status.enum';

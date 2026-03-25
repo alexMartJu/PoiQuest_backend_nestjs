@@ -4,7 +4,7 @@ import {
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { UserEntity } from '../../../users/domain/entities/user.entity';
-import { TicketEntity } from '../../../entities/ticket.entity';
+import { TicketEntity } from '../../../payments/domain/entities/ticket.entity';
 import { ScanEntity } from '../../../entities/scan.entity';
 import { UserAchievementEntity } from '../../../entities/user-achievement.entity';
 

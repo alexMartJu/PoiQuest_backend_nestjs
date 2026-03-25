@@ -11,8 +11,8 @@ import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.ent
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './events/domain/entities/point-of-interest.entity';
-import { TicketEntity } from './entities/ticket.entity';
-import { PaymentEntity } from './entities/payment.entity';
+import { TicketEntity } from './payments/domain/entities/ticket.entity';
+import { PaymentEntity } from './payments/domain/entities/payment.entity';
 import { ScanEntity } from './entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';

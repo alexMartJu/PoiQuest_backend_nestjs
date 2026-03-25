@@ -12,11 +12,11 @@ import { BlacklistTokenEntity } from './auth/domain/entities/blacklist-token.ent
 import { EventCategoryEntity } from './events/domain/entities/event-category.entity';
 import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './events/domain/entities/point-of-interest.entity';
-import { TicketEntity } from './entities/ticket.entity';
+import { TicketEntity } from './payments/domain/entities/ticket.entity';
 import { CityEntity } from './partners/domain/entities/city.entity';
 import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
 import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
-import { PaymentEntity } from './entities/payment.entity';
+import { PaymentEntity } from './payments/domain/entities/payment.entity';
 import { ScanEntity } from './entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';
@@ -33,6 +33,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PartnersModule } from './partners/partners.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { PartnersModule } from './partners/partners.module';
     ProfileModule,
     AnalyticsModule,
     PartnersModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
