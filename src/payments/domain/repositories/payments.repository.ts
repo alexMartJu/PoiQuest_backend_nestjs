@@ -4,6 +4,7 @@ export abstract class PaymentsRepository {
   abstract createTicket(data: Partial<TicketEntity>): TicketEntity;
   abstract saveTicket(ticket: TicketEntity): Promise<TicketEntity>;
   abstract findTicketByUuid(uuid: string): Promise<TicketEntity | null>;
+  abstract findTicketByQrCode(qrCode: string): Promise<TicketEntity | null>;
   abstract findActiveTicketsByProfileId(profileId: number): Promise<TicketEntity[]>;
   abstract findUsedTicketsByProfileId(profileId: number): Promise<TicketEntity[]>;
   abstract countTicketsByProfileEventDate(profileId: number, eventId: number, visitDate: string): Promise<number>;

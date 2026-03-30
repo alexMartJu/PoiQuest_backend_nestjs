@@ -26,6 +26,13 @@ export class TypeormPaymentsRepository implements PaymentsRepository {
     });
   }
 
+  async findTicketByQrCode(qrCode: string): Promise<TicketEntity | null> {
+    return this.ticketRepo.findOne({
+      where: { qrCode },
+      relations: ['event', 'event.category', 'event.city', 'event.organizer', 'profile'],
+    });
+  }
+
   async findActiveTicketsByProfileId(profileId: number): Promise<TicketEntity[]> {
     return this.ticketRepo.find({
       where: { profileId, status: TicketStatus.ACTIVE },
