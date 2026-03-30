@@ -25,6 +25,7 @@ import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { IncidentEntity } from './entities/incident.entity';
+import { TicketValidationEntity } from './ticket-validation/domain/entities/ticket-validation.entity';
 
 //Modules
 import { UsersModule } from './users/users.module';
@@ -34,6 +35,7 @@ import { ProfileModule } from './profile/profile.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PartnersModule } from './partners/partners.module';
 import { PaymentsModule } from './payments/payments.module';
+import { TicketValidationModule } from './ticket-validation/ticket-validation.module';
 
 @Module({
   imports: [
@@ -70,6 +72,7 @@ import { PaymentsModule } from './payments/payments.module';
           ImageEntity,
           NotificationEntity,
           IncidentEntity,
+          TicketValidationEntity,
         ],
         synchronize: true, // ⚠️ Solo para desarrollo (NO en producción)
         autoLoadEntities: true, // Permite cargar automáticamente las entidades
@@ -82,6 +85,7 @@ import { PaymentsModule } from './payments/payments.module';
     AnalyticsModule,
     PartnersModule,
     PaymentsModule,
+    TicketValidationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

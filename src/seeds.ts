@@ -24,6 +24,7 @@ import { IncidentEntity } from './entities/incident.entity';
 import { CityEntity } from './partners/domain/entities/city.entity';
 import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
 import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
+import { TicketValidationEntity } from './ticket-validation/domain/entities/ticket-validation.entity';
 
 // Seeders
 import { RoleSeeder } from './db/seeding/seeds/roles.seeder';
@@ -66,6 +67,7 @@ const options: DataSourceOptions & SeederOptions = {
     ImageEntity,
     NotificationEntity,
     IncidentEntity,
+    TicketValidationEntity,
   ],
   seeds: [
     RoleSeeder,
