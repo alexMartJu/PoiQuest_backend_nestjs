@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { In, LessThanOrEqual, Repository } from 'typeorm';
 import { TicketEntity, TicketStatus } from '../../../domain/entities/ticket.entity';
 import { PaymentsRepository } from '../../../domain/repositories/payments.repository';
 
@@ -55,7 +55,7 @@ export class TypeormPaymentsRepository implements PaymentsRepository {
         profileId,
         eventId,
         visitDate,
-        status: TicketStatus.ACTIVE,
+        status: In([TicketStatus.ACTIVE, TicketStatus.USED, TicketStatus.PENDING_PAYMENT]),
       },
     });
   }
@@ -65,7 +65,7 @@ export class TypeormPaymentsRepository implements PaymentsRepository {
       where: {
         eventId,
         visitDate,
-        status: TicketStatus.ACTIVE,
+        status: In([TicketStatus.ACTIVE, TicketStatus.USED, TicketStatus.PENDING_PAYMENT]),
       },
     });
   }

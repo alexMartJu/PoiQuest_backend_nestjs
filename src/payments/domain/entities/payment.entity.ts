@@ -35,7 +35,7 @@ export class PaymentEntity {
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   status!: PaymentStatus;
 
-  @Column({ name: 'stripe_payment_intent_id', type: 'varchar', length: 255, nullable: true, unique: true })
+  @Column({ name: 'stripe_payment_intent_id', type: 'varchar', length: 255, nullable: true })
   stripePaymentIntentId?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
