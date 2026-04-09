@@ -5,7 +5,7 @@ export class ErrorResponse {
     description: 'Código de estado HTTP',
     example: 400,
   })
-  statusCode: number;
+  statusCode!: number;
 
   @ApiProperty({
     description: 'Mensaje de error descriptivo',
@@ -15,7 +15,7 @@ export class ErrorResponse {
     ],
     example: 'Evento no encontrado',
   })
-  message: string | string[];
+  message!: string | string[];
 
   @ApiProperty({
     description: 'Código de error interno para identificar la causa',
@@ -35,17 +35,17 @@ export class ErrorResponse {
     description: 'Timestamp ISO del error',
     example: '2025-11-05T12:34:56.789Z',
   })
-  timestamp: string;
+  timestamp!: string;
 
   @ApiProperty({
     description: 'Ruta del endpoint donde ocurrió el error',
     example: '/events/museo-del-prado-x1y2z3',
   })
-  path: string;
+  path!: string;
 
   @ApiProperty({
     description: 'Método HTTP de la petición',
     example: 'GET',
   })
-  method: string;
+  method!: string;
 }

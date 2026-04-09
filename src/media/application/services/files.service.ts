@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import 'multer';
 import { MinioClientService } from '../../../minio-client/minio-client.service';
 import { ValidationError } from '../../../shared/errors/validation.error';
 import { NotFoundError } from '../../../shared/errors/not-found.error';

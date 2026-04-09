@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
+import 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,

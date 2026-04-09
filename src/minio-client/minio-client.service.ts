@@ -93,7 +93,7 @@ export class MinioClientService implements OnModuleInit {
       };
     } catch (error) {
       this.logger.error(`Error al subir archivo ${fileName}:`, error);
-      throw new Error(`Error al subir archivo: ${error.message}`);
+      throw new Error(`Error al subir archivo: ${(error as Error).message}`);
     }
   }
 
@@ -122,7 +122,7 @@ export class MinioClientService implements OnModuleInit {
       };
     } catch (error) {
       this.logger.error(`Error al generar URL presigned para ${fileName}:`, error);
-      throw new Error(`Error al generar URL presigned: ${error.message}`);
+      throw new Error(`Error al generar URL presigned: ${(error as Error).message}`);
     }
   }
 
@@ -151,7 +151,7 @@ export class MinioClientService implements OnModuleInit {
       };
     } catch (error) {
       this.logger.error(`Error al generar URL presigned PUT para ${fileName}:`, error);
-      throw new Error(`Error al generar URL presigned PUT: ${error.message}`);
+      throw new Error(`Error al generar URL presigned PUT: ${(error as Error).message}`);
     }
   }
 
@@ -166,7 +166,7 @@ export class MinioClientService implements OnModuleInit {
       this.logger.log(`Archivo eliminado: ${fileName} del bucket ${bucket}`);
     } catch (error) {
       this.logger.error(`Error al eliminar archivo ${fileName}:`, error);
-      throw new Error(`Error al eliminar archivo: ${error.message}`);
+      throw new Error(`Error al eliminar archivo: ${(error as Error).message}`);
     }
   }
 
@@ -181,7 +181,7 @@ export class MinioClientService implements OnModuleInit {
       this.logger.log(`${fileNames.length} archivos eliminados del bucket ${bucket}`);
     } catch (error) {
       this.logger.error(`Error al eliminar archivos:`, error);
-      throw new Error(`Error al eliminar archivos: ${error.message}`);
+      throw new Error(`Error al eliminar archivos: ${(error as Error).message}`);
     }
   }
 
@@ -196,7 +196,7 @@ export class MinioClientService implements OnModuleInit {
       return await this.minioClient.getObject(bucket, fileName);
     } catch (error) {
       this.logger.error(`Error al obtener stream de ${fileName}:`, error);
-      throw new Error(`Error al obtener archivo: ${error.message}`);
+      throw new Error(`Error al obtener archivo: ${(error as Error).message}`);
     }
   }
 
