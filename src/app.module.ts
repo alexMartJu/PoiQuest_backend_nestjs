@@ -17,7 +17,7 @@ import { CityEntity } from './partners/domain/entities/city.entity';
 import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
 import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
 import { PaymentEntity } from './payments/domain/entities/payment.entity';
-import { ScanEntity } from './entities/scan.entity';
+import { ScanEntity } from './explore/domain/entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';
 import { RouteEntity } from './events/domain/entities/route.entity';
@@ -36,6 +36,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { PartnersModule } from './partners/partners.module';
 import { PaymentsModule } from './payments/payments.module';
 import { TicketValidationModule } from './ticket-validation/ticket-validation.module';
+import { ExploreModule } from './explore/explore.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { TicketValidationModule } from './ticket-validation/ticket-validation.mo
     PartnersModule,
     PaymentsModule,
     TicketValidationModule,
+    ExploreModule,
   ],
   controllers: [AppController],
   providers: [AppService],
