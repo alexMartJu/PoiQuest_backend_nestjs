@@ -4,7 +4,7 @@ import {
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { EventEntity } from './event.entity';
-import { ScanEntity } from '../../../entities/scan.entity';
+import { ScanEntity } from '../../../explore/domain/entities/scan.entity';
 
 @Entity({ name: 'point_of_interest' })
 @Index('uq_poi_uuid', ['uuid'], { unique: true })

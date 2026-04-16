@@ -13,7 +13,7 @@ import { EventEntity } from './events/domain/entities/event.entity';
 import { PointOfInterestEntity } from './events/domain/entities/point-of-interest.entity';
 import { TicketEntity } from './payments/domain/entities/ticket.entity';
 import { PaymentEntity } from './payments/domain/entities/payment.entity';
-import { ScanEntity } from './entities/scan.entity';
+import { ScanEntity } from './explore/domain/entities/scan.entity';
 import { AchievementEntity } from './entities/achievement.entity';
 import { UserAchievementEntity } from './entities/user-achievement.entity';
 import { RouteEntity } from './events/domain/entities/route.entity';

@@ -5,7 +5,7 @@ import {
 import { randomUUID } from 'crypto';
 import { UserEntity } from '../../../users/domain/entities/user.entity';
 import { TicketEntity } from '../../../payments/domain/entities/ticket.entity';
-import { ScanEntity } from '../../../entities/scan.entity';
+import { ScanEntity } from '../../../explore/domain/entities/scan.entity';
 import { UserAchievementEntity } from '../../../entities/user-achievement.entity';
 
 @Entity({ name: 'profile' })
