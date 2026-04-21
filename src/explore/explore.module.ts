@@ -11,6 +11,7 @@ import { RouteEntity } from '../events/domain/entities/route.entity';
 import { ImageEntity } from '../media/domain/entities/image.entity';
 import { MediaModule } from '../media/media.module';
 import { ProfileModule } from '../profile/profile.module';
+import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ProfileModule } from '../profile/profile.module';
     ]),
     MediaModule,
     ProfileModule,
+    GamificationModule,
   ],
   controllers: [ExploreController],
   providers: [

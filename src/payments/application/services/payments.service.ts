@@ -14,6 +14,7 @@ import { ConfirmFreeTicketsDto } from '../dto/confirm-free-tickets.dto';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
 import { ForbiddenError } from '../../../shared/errors/forbidden.error';
+import { GamificationService } from '../../../gamification/application/services/gamification.service';
 
 @Injectable()
 export class PaymentsService {
@@ -25,6 +26,7 @@ export class PaymentsService {
     private readonly profileRepo: ProfileRepository,
     private readonly configService: ConfigService,
     private readonly dataSource: DataSource,
+    private readonly gamificationService: GamificationService,
   ) {
     const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!secretKey) {
@@ -87,15 +89,22 @@ export class PaymentsService {
 
     const totalAmount = Math.round(price * dto.quantity * 100); // Stripe trabaja en centimos
 
+    // Aplicar descuento por nivel de gamificación
+    const discount = await this.gamificationService.getDiscountForUser(userId);
+    const discountedAmount = discount > 0
+      ? Math.round(totalAmount * (1 - discount / 100))
+      : totalAmount;
+
     // Crear PaymentIntent en Stripe
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: totalAmount,
+      amount: discountedAmount,
       currency: 'eur',
       metadata: {
         eventUuid: dto.eventUuid,
         visitDate: dto.visitDate,
         quantity: String(dto.quantity),
         profileId: String(profile.id),
+        discount: String(discount),
       },
     });
 
@@ -173,6 +182,9 @@ export class PaymentsService {
         }
       }
     });
+
+    // Verificar y desbloquear logros después de la compra
+    await this.gamificationService.checkAndUnlockAchievements(userId);
 
     return { message: 'Pago confirmado y tickets activados' };
   }

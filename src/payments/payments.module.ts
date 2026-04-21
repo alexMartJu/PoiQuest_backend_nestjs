@@ -10,6 +10,7 @@ import { PaymentsRepository } from './domain/repositories/payments.repository';
 import { TypeormPaymentsRepository } from './infrastructure/persistence/typeorm/typeorm-payments.repository';
 import { EventsModule } from '../events/events.module';
 import { ProfileModule } from '../profile/profile.module';
+import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProfileModule } from '../profile/profile.module';
     ScheduleModule.forRoot(),
     EventsModule,
     ProfileModule,
+    GamificationModule,
   ],
   controllers: [PaymentsController],
   providers: [

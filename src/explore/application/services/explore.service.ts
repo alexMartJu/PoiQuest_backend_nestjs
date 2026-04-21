@@ -9,12 +9,14 @@ import { TicketStatus } from '../../../payments/domain/entities/ticket.entity';
 import { NotFoundError } from '../../../shared/errors/not-found.error';
 import { ValidationError } from '../../../shared/errors/validation.error';
 import { ProfileService } from '../../../profile/application/services/profile.service';
+import { GamificationService } from '../../../gamification/application/services/gamification.service';
 
 @Injectable()
 export class ExploreService {
   constructor(
     private readonly exploreRepo: ExploreRepository,
     private readonly profileService: ProfileService,
+    private readonly gamificationService: GamificationService,
   ) {}
 
   /**
@@ -172,6 +174,9 @@ export class ExploreService {
     });
 
     const savedScan = await this.exploreRepo.saveScan(scan);
+
+    // Verificar y desbloquear logros después de escanear
+    await this.gamificationService.checkAndUnlockAchievements(userId);
 
     return { scan: savedScan, poi };
   }
