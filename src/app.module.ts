@@ -18,8 +18,9 @@ import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
 import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
 import { PaymentEntity } from './payments/domain/entities/payment.entity';
 import { ScanEntity } from './explore/domain/entities/scan.entity';
-import { AchievementEntity } from './entities/achievement.entity';
-import { UserAchievementEntity } from './entities/user-achievement.entity';
+import { AchievementEntity } from './gamification/domain/entities/achievement.entity';
+import { UserAchievementEntity } from './gamification/domain/entities/user-achievement.entity';
+import { LevelEntity } from './gamification/domain/entities/level.entity';
 import { RouteEntity } from './events/domain/entities/route.entity';
 import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
@@ -37,6 +38,7 @@ import { PartnersModule } from './partners/partners.module';
 import { PaymentsModule } from './payments/payments.module';
 import { TicketValidationModule } from './ticket-validation/ticket-validation.module';
 import { ExploreModule } from './explore/explore.module';
+import { GamificationModule } from './gamification/gamification.module';
 
 @Module({
   imports: [
@@ -68,6 +70,7 @@ import { ExploreModule } from './explore/explore.module';
           ScanEntity,
           AchievementEntity,
           UserAchievementEntity,
+          LevelEntity,
           RouteEntity,
           RoutePoiEntity,
           ImageEntity,
@@ -88,6 +91,7 @@ import { ExploreModule } from './explore/explore.module';
     PaymentsModule,
     TicketValidationModule,
     ExploreModule,
+    GamificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

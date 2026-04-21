@@ -14,8 +14,9 @@ import { PointOfInterestEntity } from './events/domain/entities/point-of-interes
 import { TicketEntity } from './payments/domain/entities/ticket.entity';
 import { PaymentEntity } from './payments/domain/entities/payment.entity';
 import { ScanEntity } from './explore/domain/entities/scan.entity';
-import { AchievementEntity } from './entities/achievement.entity';
-import { UserAchievementEntity } from './entities/user-achievement.entity';
+import { AchievementEntity } from './gamification/domain/entities/achievement.entity';
+import { UserAchievementEntity } from './gamification/domain/entities/user-achievement.entity';
+import { LevelEntity } from './gamification/domain/entities/level.entity';
 import { RouteEntity } from './events/domain/entities/route.entity';
 import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
@@ -36,6 +37,8 @@ import { SponsorSeeder } from './db/seeding/seeds/sponsors.seeder';
 import { EventSeeder } from './db/seeding/seeds/events.seeder';
 import { PointOfInterestSeeder } from './db/seeding/seeds/points-of-interest.seeder';
 import { RouteSeeder } from './db/seeding/seeds/routes.seeder';
+import { AchievementSeeder } from './db/seeding/seeds/achievements.seeder';
+import { LevelSeeder } from './db/seeding/seeds/levels.seeder';
 
 config();
 
@@ -62,6 +65,7 @@ const options: DataSourceOptions & SeederOptions = {
     ScanEntity,
     AchievementEntity,
     UserAchievementEntity,
+    LevelEntity,
     RouteEntity,
     RoutePoiEntity,
     ImageEntity,
@@ -79,6 +83,8 @@ const options: DataSourceOptions & SeederOptions = {
     EventSeeder,
     PointOfInterestSeeder,
     RouteSeeder,
+    LevelSeeder,
+    AchievementSeeder,
   ],
 };
 
