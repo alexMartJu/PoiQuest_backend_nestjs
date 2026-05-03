@@ -5,8 +5,7 @@ import {
 import { ProfileEntity } from '../../../profile/domain/entities/profile.entity';
 import { BlacklistTokenEntity } from '../../../auth/domain/entities/blacklist-token.entity';
 import { RoleEntity } from './role.entity';
-import { NotificationEntity } from '../../../entities/notification.entity';
-import { IncidentEntity } from '../../../entities/incident.entity';
+import { NotificationEntity } from '../../../notifications/domain/entities/notification.entity';
 import { UserStatus } from '../enums/user-status.enum';
 
 @Entity({ name: 'user' })
@@ -53,7 +52,4 @@ export class UserEntity {
 
   @OneToMany(() => NotificationEntity, (n) => n.user)
   notifications!: NotificationEntity[];
-
-  @OneToMany(() => IncidentEntity, (i) => i.user)
-  incidents!: IncidentEntity[];
 }

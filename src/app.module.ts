@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 //Entities
 import { UserEntity } from './users/domain/entities/user.entity';
@@ -24,8 +25,7 @@ import { LevelEntity } from './gamification/domain/entities/level.entity';
 import { RouteEntity } from './events/domain/entities/route.entity';
 import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
-import { NotificationEntity } from './entities/notification.entity';
-import { IncidentEntity } from './entities/incident.entity';
+import { NotificationEntity } from './notifications/domain/entities/notification.entity';
 import { TicketValidationEntity } from './ticket-validation/domain/entities/ticket-validation.entity';
 
 //Modules
@@ -39,6 +39,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { TicketValidationModule } from './ticket-validation/ticket-validation.module';
 import { ExploreModule } from './explore/explore.module';
 import { GamificationModule } from './gamification/gamification.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { GamificationModule } from './gamification/gamification.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'mysql',
@@ -75,7 +77,6 @@ import { GamificationModule } from './gamification/gamification.module';
           RoutePoiEntity,
           ImageEntity,
           NotificationEntity,
-          IncidentEntity,
           TicketValidationEntity,
         ],
         synchronize: true, // ⚠️ Solo para desarrollo (NO en producción)
@@ -92,6 +93,7 @@ import { GamificationModule } from './gamification/gamification.module';
     TicketValidationModule,
     ExploreModule,
     GamificationModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
 import { TicketEntity } from './domain/entities/ticket.entity';
 import { PaymentEntity } from './domain/entities/payment.entity';
 import { PaymentsController } from './presentation/controllers/payments.controller';
@@ -15,7 +14,6 @@ import { GamificationModule } from '../gamification/gamification.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([TicketEntity, PaymentEntity]),
-    ScheduleModule.forRoot(),
     EventsModule,
     ProfileModule,
     GamificationModule,

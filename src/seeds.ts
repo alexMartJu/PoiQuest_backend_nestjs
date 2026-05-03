@@ -20,8 +20,7 @@ import { LevelEntity } from './gamification/domain/entities/level.entity';
 import { RouteEntity } from './events/domain/entities/route.entity';
 import { RoutePoiEntity } from './events/domain/entities/route-poi.entity';
 import { ImageEntity } from './media/domain/entities/image.entity';
-import { NotificationEntity } from './entities/notification.entity';
-import { IncidentEntity } from './entities/incident.entity';
+import { NotificationEntity } from './notifications/domain/entities/notification.entity';
 import { CityEntity } from './partners/domain/entities/city.entity';
 import { OrganizerEntity } from './partners/domain/entities/organizer.entity';
 import { SponsorEntity } from './partners/domain/entities/sponsor.entity';
@@ -70,7 +69,6 @@ const options: DataSourceOptions & SeederOptions = {
     RoutePoiEntity,
     ImageEntity,
     NotificationEntity,
-    IncidentEntity,
     TicketValidationEntity,
   ],
   seeds: [

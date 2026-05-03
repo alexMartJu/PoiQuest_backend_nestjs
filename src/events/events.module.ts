@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
 import { EventsController } from './presentation/controllers/events.controller';
 import { EventCategoriesController } from './presentation/controllers/event-categories.controller';
 import { PointsOfInterestController } from './presentation/controllers/points-of-interest.controller';
@@ -30,7 +29,6 @@ import { PartnersModule } from '../partners/partners.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([EventEntity, EventCategoryEntity, PointOfInterestEntity, RouteEntity, RoutePoiEntity]),
-    ScheduleModule.forRoot(),
     MediaModule,
     MinioClientModule,
     PartnersModule,
