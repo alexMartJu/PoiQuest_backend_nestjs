@@ -241,7 +241,7 @@ export class PaymentsService {
       }
     }
 
-    // Crear tickets directamente activos sin QR (gratuitos)
+    // Crear tickets directamente usados sin QR (gratuitos)
     const tickets = await this.dataSource.transaction(async (manager) => {
       const createdTickets: TicketEntity[] = [];
 
@@ -250,7 +250,7 @@ export class PaymentsService {
           profileId: profile.id,
           eventId: event.id,
           qrCode: null, // Sin QR para eventos gratuitos
-          status: TicketStatus.ACTIVE,
+          status: TicketStatus.USED,
           visitDate: dto.visitDate,
         });
         const saved = await manager.save(ticket);
@@ -298,6 +298,12 @@ export class PaymentsService {
     const available = capacity !== null ? Math.max(capacity - sold, 0) : null;
 
     return { capacity, sold, available };
+  }
+
+  /// Obtiene los tickets activos para una fecha de visita concreta.
+  /// Usado por el scheduler de notificaciones.
+  async getActiveTicketsByVisitDate(visitDate: string): Promise<TicketEntity[]> {
+    return this.paymentsRepo.findActiveTicketsByVisitDate(visitDate);
   }
 
   /// Marca como expirados los tickets ACTIVE cuya fecha de visita ya pasó.

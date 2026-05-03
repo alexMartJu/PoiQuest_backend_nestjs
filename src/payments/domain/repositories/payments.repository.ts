@@ -10,6 +10,7 @@ export abstract class PaymentsRepository {
   abstract countTicketsByProfileEventDate(profileId: number, eventId: number, visitDate: string): Promise<number>;
   abstract countTicketsByEventAndDate(eventId: number, visitDate: string): Promise<number>;
   abstract findActiveTicketsBeforeOrEqualDate(date: string): Promise<TicketEntity[]>;
+  abstract findActiveTicketsByVisitDate(visitDate: string): Promise<TicketEntity[]>;
   abstract markTicketsAsExpired(ids: number[]): Promise<void>;
   abstract updateTicketStatus(ticketId: number, status: TicketStatus): Promise<void>;
 }

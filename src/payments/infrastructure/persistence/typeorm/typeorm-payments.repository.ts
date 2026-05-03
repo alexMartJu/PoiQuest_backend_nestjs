@@ -79,6 +79,19 @@ export class TypeormPaymentsRepository implements PaymentsRepository {
     });
   }
 
+  async findActiveTicketsByVisitDate(visitDate: string): Promise<TicketEntity[]> {
+    return this.ticketRepo.find({
+      where: { status: TicketStatus.ACTIVE, visitDate },
+      relations: ['event', 'profile'],
+      select: {
+        id: true,
+        visitDate: true,
+        profile: { id: true, userId: true },
+        event: { id: true, name: true },
+      },
+    });
+  }
+
   async markTicketsAsExpired(ids: number[]): Promise<void> {
     if (ids.length === 0) return;
     await this.ticketRepo
