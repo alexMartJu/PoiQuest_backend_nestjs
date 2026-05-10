@@ -72,6 +72,7 @@ export class ExploreController {
     description: 'Devuelve el progreso de POIs y rutas para un evento y fecha de visita específicos.',
   })
   @ApiQuery({ name: 'visitDate', required: true, type: String, description: 'Fecha de visita (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'ticketUuid', required: false, type: String, description: 'UUID del ticket concreto (necesario si hay varios tickets para el mismo evento y fecha)' })
   @ApiOkResponse({ type: EventProgressResponse, description: 'Progreso detallado del evento' })
   @ApiNotFoundResponse({ type: ErrorResponse, description: 'Ticket o evento no encontrado' })
   @ApiUnauthorizedResponse({ type: ErrorResponse, description: 'Token inválido o no proporcionado' })
@@ -81,8 +82,9 @@ export class ExploreController {
     @CurrentUser() user: CurrentUserPayload,
     @Param('eventUuid') eventUuid: string,
     @Query('visitDate') visitDate: string,
+    @Query('ticketUuid') ticketUuid?: string,
   ): Promise<EventProgressResponse> {
-    const result = await this.exploreService.getEventProgress(user.userId, eventUuid, visitDate);
+    const result = await this.exploreService.getEventProgress(user.userId, eventUuid, visitDate, ticketUuid);
 
     const presignedUrlsMap = result.primaryImage
       ? await PresignedUrlHelper.generatePresignedUrls([result.primaryImage], this.filesService)

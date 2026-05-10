@@ -74,19 +74,27 @@ export class ExploreService {
   /**
    * Obtener progreso detallado de un evento para un ticket específico.
    */
-  async getEventProgress(userId: number, eventUuid: string, visitDate: string): Promise<EventProgressDto> {
+  async getEventProgress(userId: number, eventUuid: string, visitDate: string, ticketUuid?: string): Promise<EventProgressDto> {
     const profile = await this.profileService.getMyProfile(userId);
 
-    // Buscar el ticket del usuario para ese evento y fecha
-    const ticket = await this.exploreRepo.findTicketByProfileAndEvent(
-      profile.id,
-      eventUuid,
-      visitDate,
-      [TicketStatus.ACTIVE, TicketStatus.USED],
-    );
-
-    if (!ticket) {
-      throw new NotFoundError('Ticket no encontrado para este evento y fecha');
+    let ticket;
+    if (ticketUuid) {
+      // Buscar el ticket concreto indicado por la app
+      ticket = await this.exploreRepo.findTicketByUuidAndProfileWithEvent(ticketUuid, profile.id);
+      if (!ticket) {
+        throw new NotFoundError('Ticket no encontrado');
+      }
+    } else {
+      // Fallback: buscar el primer ticket del usuario para ese evento y fecha
+      ticket = await this.exploreRepo.findTicketByProfileAndEvent(
+        profile.id,
+        eventUuid,
+        visitDate,
+        [TicketStatus.ACTIVE, TicketStatus.USED],
+      );
+      if (!ticket) {
+        throw new NotFoundError('Ticket no encontrado para este evento y fecha');
+      }
     }
 
     // Obtener imagen primaria del evento
@@ -95,7 +103,7 @@ export class ExploreService {
     // Obtener todos los POIs del evento
     const allPois = await this.exploreRepo.findPoisByEventId(ticket.event.id);
 
-    // Obtener IDs de POIs escaneados por este ticket
+    // Obtener IDs de POIs escaneados por ESTE ticket específico
     const scannedPoiIds = await this.exploreRepo.findScannedPoiIdsByTicket(ticket.id);
     const scannedSet = new Set(scannedPoiIds);
 
