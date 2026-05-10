@@ -3,21 +3,21 @@
 /// El orden del array determina el sort_order de los POIs en la ruta.
 export default [
   {
-    eventName: 'Museo del Prado',
-    name: 'Ruta de las Obras Maestras',
-    description: 'Recorrido por las obras más icónicas del museo, desde Velázquez hasta El Bosco.',
-    poiTitles: ['Las Meninas', 'El Jardín de las Delicias'],
+    eventName: 'Festival de les Arts',
+    name: 'Ruta por el Recinto del Festival',
+    description: 'Recorrido por los espacios principales del Festival de les Arts: desde el escenario central frente al Palau de les Arts Reina Sofía hasta las actividades del Agora.',
+    poiTitles: ['Escenario Principal - Palau de les Arts', 'Agora - Zona de Actividades'],
   },
   {
-    eventName: 'Concierto Sinfónico de Verano',
-    name: 'Ruta de Acceso al Recinto',
-    description: 'Recorrido desde la entrada principal hasta la zona VIP.',
-    poiTitles: ['Entrada Principal', 'Zona VIP'],
+    eventName: 'IVAM - Exposición de Arte Contemporáneo',
+    name: 'Ruta por la Colección Permanente del IVAM',
+    description: 'Recorrido por dos obras clave de la colección permanente del IVAM: el informalismo matérico de Antoni Tàpies y el constructivismo lumínico de László Moholy-Nagy.',
+    poiTitles: ['Gran díptico rojo y negro', 'Leda y el cisne'],
   },
   {
-    eventName: 'Tour por el Madrid de los Austrias',
-    name: 'Ruta Monumental Clásica',
-    description: 'Itinerario por los monumentos más representativos del Madrid de los siglos XVI-XVII.',
-    poiTitles: ['Catedral de la Almudena', 'Plaza Mayor'],
+    eventName: 'Tour por el Centro Histórico de Valencia',
+    name: 'Ruta Monumental Clàssica',
+    description: 'Itinerario por los monumentos más representativos del centre històric de Valencia.',
+    poiTitles: ['Catedral de València', 'Plaça de la Reina'],
   },
 ];
