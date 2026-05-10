@@ -334,12 +334,16 @@ export class TypeormEventsRepository implements EventsRepository {
       qb.andWhere('COALESCE(event.price, 0) <= :maxPrice', { maxPrice: filters.maxPrice });
     }
 
+    // Lógica de solapamiento: mostrar eventos activos en algún momento del rango seleccionado.
+    // Un evento solapa con [filterStart, filterEnd] si:
+    //   evento.startDate <= filterEnd  (el evento arranca antes de que acabe el rango)
+    //   Y (evento.endDate IS NULL OR evento.endDate >= filterStart)  (el evento no ha terminado antes de que empiece el rango)
     if (filters.startDate) {
-      qb.andWhere('event.startDate >= :filterStartDate', { filterStartDate: filters.startDate });
+      qb.andWhere('(event.endDate IS NULL OR event.endDate >= :filterStartDate)', { filterStartDate: filters.startDate });
     }
 
     if (filters.endDate) {
-      qb.andWhere('(event.endDate IS NOT NULL AND event.endDate <= :filterEndDate)', { filterEndDate: filters.endDate });
+      qb.andWhere('event.startDate <= :filterEndDate', { filterEndDate: filters.endDate });
     }
   }
 }

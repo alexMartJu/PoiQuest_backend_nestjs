@@ -213,19 +213,19 @@ export class PaymentsService {
     // Validar fecha dentro del rango
     this.validateVisitDate(event.startDate, event.endDate, dto.visitDate);
 
-    // Validar cantidad (1-4)
-    if (dto.quantity < 1 || dto.quantity > 4) {
-      throw new ValidationError('La cantidad debe ser entre 1 y 4 tickets', { quantity: dto.quantity });
+    // Validar cantidad (máximo 1 ticket para eventos gratuitos)
+    if (dto.quantity !== 1) {
+      throw new ValidationError('Solo puedes obtener 1 ticket por evento gratuito', { quantity: dto.quantity });
     }
 
-    // Validar límite de 4 tickets
+    // Validar que no tenga ya un ticket para este evento en esa fecha
     const existingCount = await this.paymentsRepo.countTicketsByProfileEventDate(
       profile.id, event.id, dto.visitDate,
     );
-    if (existingCount + dto.quantity > 4) {
+    if (existingCount >= 1) {
       throw new ValidationError(
-        `Ya tienes ${existingCount} ticket(s) para este evento en esa fecha. Máximo 4 por persona.`,
-        { existing: existingCount, requested: dto.quantity },
+        'Ya tienes un ticket gratuito para este evento en esa fecha.',
+        { existing: existingCount },
       );
     }
 
